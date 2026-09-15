@@ -1,0 +1,24 @@
+{
+  "Database": {
+    "Provider": "Sqlite"
+  },
+  "ConnectionStrings": {
+    "Sqlite": "App_Data/toplanderp.db",
+    "DefaultConnection": "Server=localhost,1433;Database=ToplandERP_Dev;User Id=sa;Password=REPLACE_WITH_LOCAL_PASSWORD;TrustServerCertificate=True;Encrypt=True;MultipleActiveResultSets=True"
+  },
+  "Seed": {
+    "SuperAdmin": {
+      "UserName": "admin",
+      "Email": "admin@localhost",
+      "FullName": "System Administrator",
+      "Password": "REPLACE_WITH_USER_SECRETS"
+    }
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Debug",
+      "Microsoft.AspNetCore": "Information",
+      "Microsoft.EntityFrameworkCore.Database.Command": "Information"
+    }
+  }
+}

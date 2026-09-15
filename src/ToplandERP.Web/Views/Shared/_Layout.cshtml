@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] ?? "Dashboard") - Topland ERP</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="app-body">
+    <div class="app-shell">
+        <aside class="app-sidebar" id="appSidebar">
+            <div class="sidebar-brand">
+                <span class="brand-mark">T</span>
+                <div>
+                    <strong>Topland ERP</strong>
+                    <small>Order &amp; Dispatch</small>
+                </div>
+            </div>
+            <nav class="sidebar-nav" aria-label="Main">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : null)" asp-controller="Home" asp-action="Index">
+                    Dashboard
+                </a>
+                <span class="nav-section">Coming later</span>
+                <span class="nav-link disabled" title="Implemented in a later phase">Orders</span>
+                <span class="nav-link disabled" title="Implemented in a later phase">Dispatch</span>
+                <span class="nav-link disabled" title="Implemented in a later phase">Customers</span>
+                <span class="nav-link disabled" title="Implemented in a later phase">Products</span>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Health" ? "active" : null)" asp-controller="Health" asp-action="Index">
+                    Health
+                </a>
+            </nav>
+        </aside>
+
+        <div class="app-main">
+            <header class="app-topbar">
+                <button class="btn btn-icon d-lg-none" type="button" id="sidebarToggle" aria-label="Open navigation">
+                    <span class="hamburger"></span>
+                </button>
+                <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                        @if (ViewData["Breadcrumb"] is string breadcrumb)
+                        {
+                            <li class="breadcrumb-item active" aria-current="page">@breadcrumb</li>
+                        }
+                    </ol>
+                </nav>
+                <div class="topbar-actions">
+                    <button class="btn btn-icon" type="button" title="Notifications" aria-label="Notifications">
+                        <span class="notification-bell"></span>
+                        <span class="notification-dot"></span>
+                    </button>
+                    <div class="dropdown">
+                        <button class="user-chip dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="user-avatar">@(CurrentUser.FullName?.FirstOrDefault() ?? 'U')</span>
+                            <span class="user-meta">
+                                <strong>@(CurrentUser.FullName ?? CurrentUser.UserName)</strong>
+                                <small>@(CurrentUser.IsSuperAdmin ? "Super Admin" : string.Join(", ", CurrentUser.Roles))</small>
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><span class="dropdown-item-text text-muted">Signed in as @CurrentUser.UserName</span></li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post">
+                                    <button type="submit" class="dropdown-item">Sign out</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <main class="app-content">
+                <partial name="_Alerts" />
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

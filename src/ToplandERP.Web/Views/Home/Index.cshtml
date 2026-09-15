@@ -1,0 +1,102 @@
+﻿@{
+    var companies = ViewBag.Companies as IReadOnlyList<CompanyDto> ?? [];
+    var roles = ViewBag.Roles as IEnumerable<string> ?? [];
+}
+
+<div class="page-header">
+    <div>
+        <h1>Dashboard</h1>
+        <p class="text-muted mb-0">Foundation workspace for Topland order and dispatch operations.</p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <span class="stat-label">Signed in as</span>
+            <strong>@ViewBag.FullName</strong>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <span class="stat-label">Role</span>
+            <strong>@string.Join(", ", roles)</strong>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <span class="stat-label">Accessible companies</span>
+            <strong>@companies.Count</strong>
+        </div>
+    </div>
+</div>
+
+<section class="card-panel mb-4">
+    <div class="panel-header">
+        <h2>Companies</h2>
+        <p>Company isolation is enforced in the service layer. Super Admin can see all companies.</p>
+    </div>
+    <div class="table-toolbar">
+        <input class="form-control search-input" type="search" placeholder="Search companies" disabled />
+        <button class="btn btn-secondary" type="button" disabled>Filter</button>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Code</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (companies.Count == 0)
+            {
+                <tr>
+                    <td colspan="3" class="text-muted">No companies are available for this account.</td>
+                </tr>
+            }
+            else
+            {
+                foreach (var company in companies)
+                {
+                    <tr>
+                        <td>@company.Name</td>
+                        <td><code>@company.Code</code></td>
+                        <td>
+                            @if (company.IsActive)
+                            {
+                                <span class="badge text-bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-secondary">Inactive</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+    <div class="table-footer text-muted">Pagination will be added with list modules.</div>
+</section>
+
+<section class="card-panel">
+    <div class="panel-header">
+        <h2>Status badges</h2>
+        <p>UI foundation for the future order workflow. These are not live statuses yet.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <span class="status-badge status-received">Order Received</span>
+        <span class="status-badge status-ready">Ready to Dispatch</span>
+        <span class="status-badge status-done">Dispatch Done</span>
+    </div>
+    <div class="mt-4 d-flex flex-wrap gap-2">
+        <button class="btn btn-primary" type="button">Primary</button>
+        <button class="btn btn-secondary" type="button">Secondary</button>
+        <button class="btn btn-success" type="button">Success</button>
+        <button class="btn btn-warning" type="button">Warning</button>
+        <button class="btn btn-danger" type="button">Danger</button>
+    </div>
+</section>

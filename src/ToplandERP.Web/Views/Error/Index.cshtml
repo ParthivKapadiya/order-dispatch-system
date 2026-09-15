@@ -1,0 +1,16 @@
+@model ErrorViewModel
+@{
+    Layout = User.Identity?.IsAuthenticated == true ? "_Layout" : "_LayoutAuth";
+    ViewData["Title"] = Model.Title;
+    ViewData["Breadcrumb"] = Model.Title;
+}
+
+<div class="empty-state">
+    <h1>@Model.Title</h1>
+    <p>@Model.Message</p>
+    @if (Model.ShowRequestId)
+    {
+        <p class="text-muted"><small>Request ID: @Model.RequestId</small></p>
+    }
+    <a class="btn btn-primary" asp-controller="Home" asp-action="Index">Back to dashboard</a>
+</div>

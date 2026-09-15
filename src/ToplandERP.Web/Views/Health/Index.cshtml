@@ -1,0 +1,39 @@
+@model HealthReport
+@{
+    ViewData["Title"] = "System health";
+}
+
+<div class="page-header">
+    <div>
+        <h1>System health</h1>
+        <p class="text-muted mb-0">Application and database availability checks.</p>
+    </div>
+    <span class="status-badge @(Model.Status == HealthStatus.Healthy ? "status-done" : "status-ready")">@Model.Status</span>
+</div>
+
+<div class="card-panel">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Check</th>
+                    <th>Status</th>
+                    <th>Duration</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var entry in Model.Entries)
+            {
+                <tr>
+                    <td>@entry.Key</td>
+                    <td>@entry.Value.Status</td>
+                    <td>@entry.Value.Duration.TotalMilliseconds.ToString("0") ms</td>
+                    <td>@(entry.Value.Description ?? "OK")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <p class="text-muted mb-0">Anonymous JSON endpoint: <code>/health</code></p>
+</div>

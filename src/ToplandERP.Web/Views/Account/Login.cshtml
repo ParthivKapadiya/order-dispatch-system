@@ -1,0 +1,33 @@
+@model LoginViewModel
+@{
+    Layout = "_LayoutAuth";
+    ViewData["Title"] = "Sign in";
+}
+
+<h2 class="auth-title">Sign in</h2>
+<p class="auth-subtitle">Use your Topland employee account.</p>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+<form asp-action="Login" method="post" novalidate>
+    <input type="hidden" asp-for="ReturnUrl" />
+    <div class="mb-3">
+        <label asp-for="UserName" class="form-label required">Username</label>
+        <input asp-for="UserName" class="form-control" autocomplete="username" autofocus />
+        <span asp-validation-for="UserName" class="invalid-feedback d-block"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label required">Password</label>
+        <input asp-for="Password" class="form-control" autocomplete="current-password" />
+        <span asp-validation-for="Password" class="invalid-feedback d-block"></span>
+    </div>
+    <div class="form-check mb-4">
+        <input asp-for="RememberMe" class="form-check-input" />
+        <label asp-for="RememberMe" class="form-check-label"></label>
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Sign in</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
