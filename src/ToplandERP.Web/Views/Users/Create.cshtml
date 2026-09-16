@@ -1,0 +1,65 @@
+@model CreateUserRequest
+@{
+    var roles = ViewBag.Roles as IReadOnlyList<string> ?? [];
+}
+<div class="page-header">
+    <div>
+        <h1>Create employee</h1>
+        <p class="text-muted mb-0">Role options are filtered by your permissions and validated again on the server.</p>
+    </div>
+</div>
+<section class="card-panel">
+    <form asp-action="Create" method="post" novalidate>
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        <partial name="_CompanySelect" model="Model.CompanyId" />
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="FullName" class="form-label required">Full name</label>
+                <input asp-for="FullName" class="form-control" autofocus />
+                <span asp-validation-for="FullName" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="EmployeeCode" class="form-label required">Employee code</label>
+                <input asp-for="EmployeeCode" class="form-control" />
+                <span asp-validation-for="EmployeeCode" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="UserName" class="form-label required">Username</label>
+                <input asp-for="UserName" class="form-control" autocomplete="off" />
+                <span asp-validation-for="UserName" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Email" class="form-label required">Email</label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Mobile" class="form-label required">Mobile</label>
+                <input asp-for="Mobile" class="form-control" />
+                <span asp-validation-for="Mobile" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Role" class="form-label required">Role</label>
+                <select asp-for="Role" class="form-select">
+                    <option value="">Select role</option>
+                    @foreach (var role in roles)
+                    {
+                        <option value="@role">@role</option>
+                    }
+                </select>
+                <span asp-validation-for="Role" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="TemporaryPassword" class="form-label required">Temporary password</label>
+                <input asp-for="TemporaryPassword" class="form-control" type="password" autocomplete="new-password" data-val="false" />
+                <div class="form-text">Example that works: Sales@1234</div>
+                <span asp-validation-for="TemporaryPassword" class="invalid-feedback d-block"></span>
+            </div>
+        </div>
+        <div class="mt-4 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Create employee</button>
+            <a class="btn btn-secondary" asp-action="Index">Cancel</a>
+        </div>
+    </form>
+</section>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -1,0 +1,36 @@
+@model ProductWriteRequest
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+<partial name="_CompanySelect" model="Model.CompanyId" />
+<div class="row g-3">
+    <div class="col-md-4">
+        <label asp-for="ProductCode" class="form-label required">Product code</label>
+        <input asp-for="ProductCode" class="form-control" />
+        <span asp-validation-for="ProductCode" class="invalid-feedback d-block"></span>
+    </div>
+    <div class="col-md-8">
+        <label asp-for="ProductName" class="form-label required">Product name</label>
+        <input asp-for="ProductName" class="form-control" autofocus />
+        <span asp-validation-for="ProductName" class="invalid-feedback d-block"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="ModelNumber" class="form-label">Model number</label>
+        <input asp-for="ModelNumber" class="form-control" />
+        <span asp-validation-for="ModelNumber" class="invalid-feedback d-block"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Category" class="form-label">Category</label>
+        <input asp-for="Category" class="form-control" />
+        <span asp-validation-for="Category" class="invalid-feedback d-block"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Unit" class="form-label">Unit</label>
+        <input asp-for="Unit" class="form-control" placeholder="Nos, Set, Kg" />
+        <span asp-validation-for="Unit" class="invalid-feedback d-block"></span>
+    </div>
+    <div class="col-12">
+        <label asp-for="Description" class="form-label">Description</label>
+        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Description" class="invalid-feedback d-block"></span>
+    </div>
+</div>

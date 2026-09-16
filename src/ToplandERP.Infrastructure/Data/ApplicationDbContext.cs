@@ -62,6 +62,27 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
         return base.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action, CancellationToken cancellationToken = default)
+    {
+        if (!Database.IsRelational())
+        {
+            await action(cancellationToken);
+            return;
+        }
+
+        await using var transaction = await Database.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            await action(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
+        }
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

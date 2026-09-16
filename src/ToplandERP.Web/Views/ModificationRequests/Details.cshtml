@@ -1,0 +1,66 @@
+@model ModificationRequestDto
+@using ToplandERP.Domain.Enums
+@{
+    var canReview = ViewBag.CanReview as bool? == true && Model.Status == ModificationRequestStatus.Pending;
+    var reject = ViewBag.RejectRequest as RejectModificationRequest ?? new RejectModificationRequest();
+}
+
+<div class="page-header">
+    <div>
+        <h1>Modification request</h1>
+        <p class="text-muted mb-0">@Model.OrderNumber · @Model.CustomerName</p>
+    </div>
+    <span class="status-badge @(Model.Status == ModificationRequestStatus.Pending ? "status-pending" : Model.Status == ModificationRequestStatus.Approved ? "status-approved" : "status-rejected")">@Model.StatusLabel</span>
+</div>
+
+<section class="card-panel mb-3">
+    <dl class="detail-list">
+        <dt>Order</dt><dd><a asp-controller="Orders" asp-action="Details" asp-route-id="@Model.OrderId">@Model.OrderNumber</a></dd>
+        <dt>Company</dt><dd>@Model.CompanyName</dd>
+        <dt>Customer</dt><dd>@Model.CustomerName (@Model.CustomerCode)</dd>
+        <dt>Requested by</dt><dd>@Model.RequestedByName</dd>
+        <dt>Request date</dt><dd>@Model.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</dd>
+        <dt>Reason</dt><dd>@Model.Reason</dd>
+        @if (Model.ReviewedAt.HasValue)
+        {
+            <dt>Reviewed by</dt><dd>@(Model.ReviewedByName ?? "—")</dd>
+            <dt>Reviewed at</dt><dd>@Model.ReviewedAt.Value.ToLocalTime().ToString("dd MMM yyyy HH:mm")</dd>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.RejectionReason))
+        {
+            <dt>Rejection reason</dt><dd>@Model.RejectionReason</dd>
+        }
+    </dl>
+</section>
+
+<div class="row g-3 mb-3">
+    <div class="col-lg-6">
+        <section class="card-panel h-100">
+            <div class="panel-header"><h2>Current order</h2><p>Values stored on the order when the request was submitted.</p></div>
+            <partial name="_ChangeSet" model="Model.Current" />
+        </section>
+    </div>
+    <div class="col-lg-6">
+        <section class="card-panel h-100">
+            <div class="panel-header"><h2>Requested order</h2><p>These values are applied only if you approve.</p></div>
+            <partial name="_ChangeSet" model="Model.Requested" />
+        </section>
+    </div>
+</div>
+
+@if (canReview)
+{
+    <div class="d-flex flex-wrap gap-2 align-items-start">
+        <form asp-action="Approve" asp-route-id="@Model.Id" method="post" data-confirm="Approve this modification and update the order?">
+            <button class="btn btn-success" type="submit">Approve</button>
+        </form>
+        <form asp-action="Reject" asp-route-id="@Model.Id" method="post" class="flex-grow-1" style="max-width: 32rem;">
+            <label class="form-label required" for="RejectionReason">Rejection reason</label>
+            <textarea class="form-control mb-2" name="RejectionReason" id="RejectionReason" rows="2" required>@reject.RejectionReason</textarea>
+            <span asp-validation-for="RejectionReason" class="invalid-feedback d-block"></span>
+            <button class="btn btn-danger" type="submit">Reject</button>
+        </form>
+    </div>
+}
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

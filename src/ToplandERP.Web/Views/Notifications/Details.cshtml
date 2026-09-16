@@ -1,0 +1,27 @@
+@model ToplandERP.Application.Notifications.NotificationDto
+
+<div class="page-header">
+    <div>
+        <h1>@Model.Title</h1>
+        <p class="text-muted mb-0">@Model.RelativeTime</p>
+    </div>
+    <a class="btn btn-secondary" asp-action="Index">Back to notifications</a>
+</div>
+
+<section class="card-panel">
+    <p class="mb-3">@Model.Message</p>
+    <div class="d-flex flex-wrap gap-2">
+        @if (!string.IsNullOrWhiteSpace(Model.NavigationUrl))
+        {
+            <form asp-action="Open" asp-route-id="@Model.Id" method="post">
+                <button class="btn btn-primary" type="submit">Open related record</button>
+            </form>
+        }
+        @if (!Model.IsRead)
+        {
+            <form asp-action="MarkAsRead" asp-route-id="@Model.Id" method="post">
+                <button class="btn btn-outline-secondary" type="submit">Mark as read</button>
+            </form>
+        }
+    </div>
+</section>

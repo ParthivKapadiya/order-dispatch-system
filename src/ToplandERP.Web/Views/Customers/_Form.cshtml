@@ -1,0 +1,93 @@
+@model CustomerWriteRequest
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+<partial name="_CompanySelect" model="Model.CompanyId" />
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <label asp-for="CustomerCode" class="form-label required">Customer code</label>
+        <input asp-for="CustomerCode" class="form-control" />
+        <span asp-validation-for="CustomerCode" class="invalid-feedback d-block"></span>
+    </div>
+    <div class="col-md-8">
+        <label asp-for="CustomerName" class="form-label required">Customer name</label>
+        <input asp-for="CustomerName" class="form-control" autofocus />
+        <span asp-validation-for="CustomerName" class="invalid-feedback d-block"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Mobile" class="form-label required">Mobile</label>
+        <input asp-for="Mobile" class="form-control" placeholder="10-digit Indian mobile" />
+        <span asp-validation-for="Mobile" class="invalid-feedback d-block"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Email" class="form-label">Email</label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-lg-6">
+        <div class="card-panel h-100">
+            <div class="panel-header">
+                <h2>Billing address</h2>
+                <p>Used for invoices and accounts. Keep this separate from delivery.</p>
+            </div>
+            <div class="mb-3">
+                <label asp-for="BillingAddress" class="form-label required">Address</label>
+                <textarea asp-for="BillingAddress" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="BillingAddress" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="BillingCity" class="form-label required">City</label>
+                    <input asp-for="BillingCity" class="form-control" />
+                    <span asp-validation-for="BillingCity" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="BillingState" class="form-label required">State</label>
+                    <input asp-for="BillingState" class="form-control" />
+                    <span asp-validation-for="BillingState" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="BillingPincode" class="form-label required">Pincode</label>
+                    <input asp-for="BillingPincode" class="form-control" />
+                    <span asp-validation-for="BillingPincode" class="invalid-feedback d-block"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card-panel h-100">
+            <div class="panel-header d-flex justify-content-between align-items-start">
+                <div>
+                    <h2>Delivery address</h2>
+                    <p>Used for dispatch. Example: billing in Ahmedabad, delivery in Rajkot.</p>
+                </div>
+                <button class="btn btn-sm btn-secondary" type="button" id="copyBillingAddress">Copy billing</button>
+            </div>
+            <div class="mb-3">
+                <label asp-for="DeliveryAddress" class="form-label required">Address</label>
+                <textarea asp-for="DeliveryAddress" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="DeliveryAddress" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="DeliveryCity" class="form-label required">City</label>
+                    <input asp-for="DeliveryCity" class="form-control" />
+                    <span asp-validation-for="DeliveryCity" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="DeliveryState" class="form-label required">State</label>
+                    <input asp-for="DeliveryState" class="form-control" />
+                    <span asp-validation-for="DeliveryState" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="DeliveryPincode" class="form-label required">Pincode</label>
+                    <input asp-for="DeliveryPincode" class="form-control" />
+                    <span asp-validation-for="DeliveryPincode" class="invalid-feedback d-block"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

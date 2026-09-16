@@ -16,10 +16,17 @@ public sealed class TransporterConfiguration : IEntityTypeConfiguration<Transpor
             .IsRequired()
             .HasMaxLength(200);
 
-        builder.Property(entity => entity.Phone)
+        builder.Property(entity => entity.ContactPerson)
+            .HasMaxLength(200);
+
+        builder.Property(entity => entity.Mobile)
+            .HasColumnName("Phone")
             .HasMaxLength(30);
 
-        builder.Property(entity => entity.VehicleDetails)
+        builder.Property(entity => entity.Address)
+            .HasMaxLength(500);
+
+        builder.Property<string?>("VehicleDetails")
             .HasMaxLength(250);
 
         builder.HasOne(entity => entity.Company)

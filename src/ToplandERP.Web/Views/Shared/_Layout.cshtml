@@ -18,17 +18,50 @@
                 </div>
             </div>
             <nav class="sidebar-nav" aria-label="Main">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : null)" asp-controller="Home" asp-action="Index">
-                    Dashboard
-                </a>
+                @{
+                    var controllerName = ViewContext.RouteData.Values["controller"]?.ToString();
+                    bool Can(params string[] roles) => roles.Any(role => User.IsInRole(role));
+                }
+                <a class="nav-link @(controllerName == "Home" ? "active" : null)" asp-controller="Home" asp-action="Index">Dashboard</a>
+                @if (Can(RoleNames.SuperAdmin, RoleNames.CompanyAdmin, RoleNames.SalesEmployee, RoleNames.DispatchUser))
+                {
+                    <a class="nav-link @(controllerName == "Companies" ? "active" : null)" asp-controller="Companies" asp-action="Index">Companies</a>
+                }
+                @if (Can(RoleNames.SuperAdmin, RoleNames.CompanyAdmin))
+                {
+                    <a class="nav-link @(controllerName == "Users" ? "active" : null)" asp-controller="Users" asp-action="Index">Employees</a>
+                }
+                @if (Can(RoleNames.SuperAdmin, RoleNames.CompanyAdmin, RoleNames.SalesEmployee))
+                {
+                    <a class="nav-link @(controllerName == "Customers" ? "active" : null)" asp-controller="Customers" asp-action="Index">Customers</a>
+                    <a class="nav-link @(controllerName == "Products" ? "active" : null)" asp-controller="Products" asp-action="Index">Products</a>
+                }
+                @if (Can(RoleNames.SuperAdmin, RoleNames.CompanyAdmin, RoleNames.SalesEmployee, RoleNames.DispatchUser))
+                {
+                    <a class="nav-link @(controllerName == "Transporters" ? "active" : null)" asp-controller="Transporters" asp-action="Index">Transporters</a>
+                }
+                @if (Can(RoleNames.SuperAdmin, RoleNames.CompanyAdmin, RoleNames.SalesEmployee))
+                {
+                    <a class="nav-link @(controllerName == "PaymentConditions" ? "active" : null)" asp-controller="PaymentConditions" asp-action="Index">Payment Conditions</a>
+                }
+                @if (Can(RoleNames.SuperAdmin, RoleNames.CompanyAdmin, RoleNames.SalesEmployee))
+                {
+                    <a class="nav-link @(controllerName == "Orders" ? "active" : null)" asp-controller="Orders" asp-action="Index">Orders</a>
+                }
+                @if (Can(RoleNames.SuperAdmin, RoleNames.CompanyAdmin, RoleNames.DispatchUser))
+                {
+                    <a class="nav-link @(controllerName == "Dispatch" ? "active" : null)" asp-controller="Dispatch" asp-action="Index">Dispatch</a>
+                }
+                @if (Can(RoleNames.SuperAdmin, RoleNames.CompanyAdmin))
+                {
+                    <a class="nav-link @(controllerName == "ModificationRequests" ? "active" : null)" asp-controller="ModificationRequests" asp-action="Index">Modification Requests</a>
+                }
+                <a class="nav-link @(controllerName == "Notifications" ? "active" : null)" asp-controller="Notifications" asp-action="Index">Notifications</a>
                 <span class="nav-section">Coming later</span>
-                <span class="nav-link disabled" title="Implemented in a later phase">Orders</span>
-                <span class="nav-link disabled" title="Implemented in a later phase">Dispatch</span>
-                <span class="nav-link disabled" title="Implemented in a later phase">Customers</span>
-                <span class="nav-link disabled" title="Implemented in a later phase">Products</span>
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Health" ? "active" : null)" asp-controller="Health" asp-action="Index">
-                    Health
-                </a>
+                <span class="nav-link disabled" title="Implemented in a later phase">Reports</span>
+                <span class="nav-link disabled" title="Implemented in a later phase">Audit Logs</span>
+                <span class="nav-link disabled" title="Implemented in a later phase">Settings</span>
+                <a class="nav-link @(controllerName == "Health" ? "active" : null)" asp-controller="Health" asp-action="Index">Health</a>
             </nav>
         </aside>
 
@@ -47,10 +80,7 @@
                     </ol>
                 </nav>
                 <div class="topbar-actions">
-                    <button class="btn btn-icon" type="button" title="Notifications" aria-label="Notifications">
-                        <span class="notification-bell"></span>
-                        <span class="notification-dot"></span>
-                    </button>
+                    <partial name="_NotificationBell" />
                     <div class="dropdown">
                         <button class="user-chip dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="user-avatar">@(CurrentUser.FullName?.FirstOrDefault() ?? 'U')</span>

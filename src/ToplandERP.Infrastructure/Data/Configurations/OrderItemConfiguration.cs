@@ -12,6 +12,20 @@ public sealed class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
 
         builder.HasKey(entity => entity.Id);
 
+        builder.Property(entity => entity.ProductCode)
+            .IsRequired()
+            .HasMaxLength(64);
+
+        builder.Property(entity => entity.ProductName)
+            .IsRequired()
+            .HasMaxLength(200);
+
+        builder.Property(entity => entity.ModelNumber)
+            .HasMaxLength(100);
+
+        builder.Property(entity => entity.Unit)
+            .HasMaxLength(30);
+
         builder.Property(entity => entity.Quantity)
             .HasPrecision(18, 3);
 
@@ -30,5 +44,6 @@ public sealed class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
 
         builder.HasIndex(entity => entity.CompanyId);
         builder.HasIndex(entity => entity.OrderId);
+        builder.HasIndex(entity => entity.ProductId);
     }
 }

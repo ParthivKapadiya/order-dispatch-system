@@ -9,6 +9,8 @@ namespace ToplandERP.IntegrationTests;
 
 public sealed class ToplandWebApplicationFactory : WebApplicationFactory<Program>
 {
+    private readonly string _databaseName = $"ToplandERP_IntegrationTests_{Guid.NewGuid()}";
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
@@ -20,7 +22,7 @@ public sealed class ToplandWebApplicationFactory : WebApplicationFactory<Program
         builder.ConfigureServices(services =>
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseInMemoryDatabase("ToplandERP_IntegrationTests"));
+                options.UseInMemoryDatabase(_databaseName));
         });
     }
 

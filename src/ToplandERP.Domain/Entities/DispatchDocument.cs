@@ -1,4 +1,5 @@
 using ToplandERP.Domain.Common;
+using ToplandERP.Domain.Enums;
 
 namespace ToplandERP.Domain.Entities;
 
@@ -16,5 +17,7 @@ public class DispatchDocument : BaseEntity, ICompanyScoped
 
     public string? ContentType { get; set; }
 
-    public string? DocumentType { get; set; }
+    public DispatchDocumentType DocumentType { get; set; } = DispatchDocumentType.Other;
+
+    public Guid? UploadedByUserId { get; set; }
 }

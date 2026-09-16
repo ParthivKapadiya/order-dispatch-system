@@ -1,0 +1,28 @@
+@model PaymentConditionDto
+@{
+    var canManage = ViewBag.CanManage as bool? == true;
+}
+<div class="page-header">
+    <div>
+        <h1>@Model.Name</h1>
+        <p class="text-muted mb-0">@Model.CompanyName</p>
+    </div>
+    <div class="d-flex gap-2">
+        @if (canManage)
+        {
+            <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+            <form asp-action="SetActive" method="post" data-confirm="@(Model.IsActive ? "Deactivate this payment condition?" : "Activate this payment condition?")">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <input type="hidden" name="isActive" value="@(!Model.IsActive)" />
+                <button class="btn @(Model.IsActive ? "btn-warning" : "btn-success")" type="submit">@(Model.IsActive ? "Deactivate" : "Activate")</button>
+            </form>
+        }
+        <a class="btn btn-secondary" asp-action="Index">Back</a>
+    </div>
+</div>
+<section class="card-panel">
+    <dl class="detail-list">
+        <dt>Description</dt><dd>@(Model.Description ?? "—")</dd>
+        <dt>Status</dt><dd><partial name="_StatusBadge" model="Model.IsActive" /></dd>
+    </dl>
+</section>

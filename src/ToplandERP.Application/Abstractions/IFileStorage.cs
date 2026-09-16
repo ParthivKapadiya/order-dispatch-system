@@ -9,6 +9,8 @@ public interface IFileStorage
         CancellationToken cancellationToken = default);
 
     Task DeleteAsync(string storedPath, CancellationToken cancellationToken = default);
+
+    Task<Stream> OpenReadAsync(string storedPath, CancellationToken cancellationToken = default);
 }
 
 public sealed record StoredFile(

@@ -1,0 +1,94 @@
+@using ToplandERP.Application.Common
+@using ToplandERP.Application.Companies
+@using ToplandERP.Application.PaymentConditions
+@model PagedResult<PaymentConditionDto>
+@{
+    var query = ViewBag.Query as PagedQuery ?? new PagedQuery();
+    var companies = ViewBag.Companies as IReadOnlyList<CompanyDto> ?? [];
+    var canManage = ViewBag.CanManage as bool? == true;
+}
+<div class="page-header">
+    <div>
+        <h1>Payment conditions</h1>
+        <p class="text-muted mb-0">These values will be selected on orders. They are not hard-coded.</p>
+    </div>
+    @if (canManage) { <a class="btn btn-primary" asp-action="Create">Create payment condition</a> }
+</div>
+<section class="card-panel">
+    <form method="get" class="table-toolbar">
+        <input class="form-control search-input" type="search" name="Search" value="@query.Search" placeholder="Search name" />
+        <select class="form-select" name="IsActive" style="max-width: 12rem;">
+            <option value="">All statuses</option>
+            @if (query.IsActive == true)
+            {
+                <option value="true" selected>Active</option>
+            }
+            else
+            {
+                <option value="true">Active</option>
+            }
+            @if (query.IsActive == false)
+            {
+                <option value="false" selected>Inactive</option>
+            }
+            else
+            {
+                <option value="false">Inactive</option>
+            }
+        </select>
+        @if (CurrentUser.IsSuperAdmin)
+        {
+            <select class="form-select" name="CompanyId" style="max-width: 16rem;">
+                <option value="">All companies</option>
+                @foreach (var company in companies)
+                {
+                    @if (query.CompanyId == company.Id)
+                    {
+                        <option value="@company.Id" selected>@company.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@company.Id">@company.Name</option>
+                    }
+                }
+            </select>
+        }
+        <button class="btn btn-secondary" type="submit">Filter</button>
+    </form>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    @if (CurrentUser.IsSuperAdmin) { <th>Company</th> }
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Model.Items.Count == 0)
+            {
+                <tr><td colspan="5" class="text-muted">No payment conditions match the current filters.</td></tr>
+            }
+            else
+            {
+                foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@(item.Description ?? "—")</td>
+                        @if (CurrentUser.IsSuperAdmin) { <td>@item.CompanyCode</td> }
+                        <td><partial name="_StatusBadge" model="item.IsActive" /></td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-secondary" asp-action="Details" asp-route-id="@item.Id">View</a>
+                            @if (canManage) { <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@item.Id">Edit</a> }
+                        </td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+    <partial name="_Pagination" model="Model" />
+</section>

@@ -1,0 +1,86 @@
+@model CompleteDispatchRequest
+@{
+    var dispatch = ViewBag.Dispatch as DispatchDto ?? new DispatchDto();
+    var catalog = ViewBag.Catalog as OrderCreateCatalog ?? new OrderCreateCatalog();
+}
+<div class="page-header">
+    <div>
+        <h1>@dispatch.OrderNumber</h1>
+        <p class="text-muted mb-0">@dispatch.CustomerName · @dispatch.CompanyName</p>
+    </div>
+    <span class="status-badge status-ready">@dispatch.StatusLabel</span>
+</div>
+
+<section class="card-panel mb-3">
+    <p class="mb-1"><strong>Customer</strong><br />@dispatch.CustomerName</p>
+    <p class="mb-1"><strong>Products</strong><br />@dispatch.ProductSummary</p>
+    <p class="mb-0"><strong>Transport</strong><br />@(string.IsNullOrWhiteSpace(dispatch.TransporterName) ? "—" : dispatch.TransporterName) @(string.IsNullOrWhiteSpace(dispatch.BookingNumber) ? "" : $"· {dispatch.BookingNumber}")</p>
+</section>
+
+<section class="card-panel">
+    <form asp-action="Complete" asp-route-orderId="@dispatch.OrderId" method="post" enctype="multipart/form-data" novalidate data-confirm="Mark this order Dispatch Done? The order will be locked.">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        <div class="row g-3">
+            <div class="col-12">
+                <label asp-for="DispatchDate" class="form-label required">Dispatch date</label>
+                <input asp-for="DispatchDate" class="form-control form-control-lg" type="date" />
+                <span asp-validation-for="DispatchDate" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="DispatchPersonName" class="form-label required">Dispatch person</label>
+                <input asp-for="DispatchPersonName" class="form-control form-control-lg" />
+                <div class="form-text">Signed-in user is recorded automatically. This name is shown on the dispatch record.</div>
+                <span asp-validation-for="DispatchPersonName" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="TransporterId" class="form-label required">Transporter</label>
+                <select asp-for="TransporterId" class="form-select form-select-lg">
+                    <option value="">Select transporter</option>
+                    @foreach (var item in catalog.Transporters)
+                    {
+                        if (Model.TransporterId == item.Id)
+                        {
+                            <option value="@item.Id" selected>@item.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="TransporterId" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="LrNumber" class="form-label">LR number</label>
+                <input asp-for="LrNumber" class="form-control form-control-lg" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="BookingNumber" class="form-label">Booking / receipt number</label>
+                <input asp-for="BookingNumber" class="form-control form-control-lg" />
+            </div>
+            <div class="col-12">
+                <label asp-for="Notes" class="form-label">Notes</label>
+                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="col-12">
+                <div class="dispatch-upload">
+                    <label class="form-label" for="MaterialPhotos">Material photos</label>
+                    <input class="form-control form-control-lg" type="file" id="MaterialPhotos" name="MaterialPhotos" accept="image/jpeg,image/png,image/webp,application/pdf" multiple capture="environment" />
+                    <div class="form-text">Optional, but recommended. JPG, PNG, WEBP, or PDF. Max 10 MB each.</div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="dispatch-upload">
+                    <label class="form-label" for="TransportReceipts">Transport receipt / LR photos</label>
+                    <input class="form-control form-control-lg" type="file" id="TransportReceipts" name="TransportReceipts" accept="image/jpeg,image/png,image/webp,application/pdf" multiple capture="environment" />
+                    <div class="form-text">Required if LR/booking number is empty.</div>
+                </div>
+            </div>
+        </div>
+        <div class="dispatch-actions d-grid gap-2 mt-4">
+            <button class="btn btn-success btn-lg" type="submit">Mark Dispatch Done</button>
+            <a class="btn btn-secondary btn-lg" asp-action="Index">Back to dashboard</a>
+        </div>
+    </form>
+</section>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

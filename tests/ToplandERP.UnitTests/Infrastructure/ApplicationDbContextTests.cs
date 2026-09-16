@@ -26,8 +26,38 @@ public class ApplicationDbContextTests
                 new Company { Id = ownCompanyId, Name = "Gravis", Code = CompanyCodes.Gravis, IsActive = true },
                 new Company { Id = otherCompanyId, Name = "Jeeko", Code = CompanyCodes.Jeeko, IsActive = true });
             seedContext.Customers.AddRange(
-                new Customer { Id = Guid.NewGuid(), CompanyId = ownCompanyId, Name = "Own customer" },
-                new Customer { Id = Guid.NewGuid(), CompanyId = otherCompanyId, Name = "Other customer" });
+                new Customer
+                {
+                    Id = Guid.NewGuid(),
+                    CompanyId = ownCompanyId,
+                    CustomerCode = "CUST-OWN",
+                    CustomerName = "Own customer",
+                    Mobile = "9876543210",
+                    BillingAddress = "Billing street",
+                    BillingCity = "Ahmedabad",
+                    BillingState = "Gujarat",
+                    BillingPincode = "380001",
+                    DeliveryAddress = "Delivery street",
+                    DeliveryCity = "Rajkot",
+                    DeliveryState = "Gujarat",
+                    DeliveryPincode = "360001"
+                },
+                new Customer
+                {
+                    Id = Guid.NewGuid(),
+                    CompanyId = otherCompanyId,
+                    CustomerCode = "CUST-OTH",
+                    CustomerName = "Other customer",
+                    Mobile = "9876543211",
+                    BillingAddress = "Billing street",
+                    BillingCity = "Ahmedabad",
+                    BillingState = "Gujarat",
+                    BillingPincode = "380001",
+                    DeliveryAddress = "Delivery street",
+                    DeliveryCity = "Rajkot",
+                    DeliveryState = "Gujarat",
+                    DeliveryPincode = "360001"
+                });
             await seedContext.SaveChangesAsync();
         }
 
@@ -40,7 +70,7 @@ public class ApplicationDbContextTests
         await using var queryContext = new ApplicationDbContext(options, currentUser);
         var customers = await queryContext.Customers.ToListAsync();
 
-        customers.Should().ContainSingle(customer => customer.Name == "Own customer");
+        customers.Should().ContainSingle(customer => customer.CustomerName == "Own customer");
     }
 
     [Fact]
@@ -56,8 +86,38 @@ public class ApplicationDbContextTests
                 new Company { Id = SeedIdentifiers.GravisCompanyId, Name = "Gravis", Code = CompanyCodes.Gravis, IsActive = true },
                 new Company { Id = SeedIdentifiers.JeekoCompanyId, Name = "Jeeko", Code = CompanyCodes.Jeeko, IsActive = true });
             seedContext.Customers.AddRange(
-                new Customer { Id = Guid.NewGuid(), CompanyId = SeedIdentifiers.GravisCompanyId, Name = "A" },
-                new Customer { Id = Guid.NewGuid(), CompanyId = SeedIdentifiers.JeekoCompanyId, Name = "B" });
+                new Customer
+                {
+                    Id = Guid.NewGuid(),
+                    CompanyId = SeedIdentifiers.GravisCompanyId,
+                    CustomerCode = "A1",
+                    CustomerName = "A",
+                    Mobile = "9876500001",
+                    BillingAddress = "Addr",
+                    BillingCity = "Ahmedabad",
+                    BillingState = "Gujarat",
+                    BillingPincode = "380001",
+                    DeliveryAddress = "Addr",
+                    DeliveryCity = "Rajkot",
+                    DeliveryState = "Gujarat",
+                    DeliveryPincode = "360001"
+                },
+                new Customer
+                {
+                    Id = Guid.NewGuid(),
+                    CompanyId = SeedIdentifiers.JeekoCompanyId,
+                    CustomerCode = "B1",
+                    CustomerName = "B",
+                    Mobile = "9876500002",
+                    BillingAddress = "Addr",
+                    BillingCity = "Ahmedabad",
+                    BillingState = "Gujarat",
+                    BillingPincode = "380001",
+                    DeliveryAddress = "Addr",
+                    DeliveryCity = "Rajkot",
+                    DeliveryState = "Gujarat",
+                    DeliveryPincode = "360001"
+                });
             await seedContext.SaveChangesAsync();
         }
 

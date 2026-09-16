@@ -12,6 +12,10 @@ public sealed class ApplicationUserConfiguration : IEntityTypeConfiguration<Appl
             .IsRequired()
             .HasMaxLength(200);
 
+        builder.Property(entity => entity.EmployeeCode)
+            .IsRequired()
+            .HasMaxLength(50);
+
         builder.HasOne(entity => entity.Company)
             .WithMany()
             .HasForeignKey(entity => entity.CompanyId)
@@ -19,5 +23,6 @@ public sealed class ApplicationUserConfiguration : IEntityTypeConfiguration<Appl
 
         builder.HasIndex(entity => entity.CompanyId);
         builder.HasIndex(entity => entity.IsActive);
+        builder.HasIndex(entity => new { entity.CompanyId, entity.EmployeeCode });
     }
 }

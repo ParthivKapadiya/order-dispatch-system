@@ -20,6 +20,7 @@ public static class DependencyInjection
 
         services.AddControllersWithViews();
         services.AddFluentValidationAutoValidation();
+        services.AddFluentValidationClientsideAdapters();
         services.AddValidatorsFromAssemblyContaining<LoginViewModelValidator>();
 
         var cookieSecurePolicy = environment.IsDevelopment() || environment.IsEnvironment("Testing")
@@ -55,6 +56,63 @@ public static class DependencyInjection
                 policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin, RoleNames.SalesEmployee));
 
             options.AddPolicy(AuthorizationPolicies.DispatchUser, policy =>
+                policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin, RoleNames.DispatchUser));
+
+            options.AddPolicy(AuthorizationPolicies.CanViewCompanies, policy =>
+                policy.RequireAuthenticatedUser());
+
+            options.AddPolicy(AuthorizationPolicies.CanViewCustomers, policy =>
+                policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin, RoleNames.SalesEmployee));
+
+            options.AddPolicy(AuthorizationPolicies.CanManageCustomers, policy =>
+                policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin, RoleNames.SalesEmployee));
+
+            options.AddPolicy(AuthorizationPolicies.CanEditCustomers, policy =>
+                policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin));
+
+            options.AddPolicy(AuthorizationPolicies.CanToggleCustomers, policy =>
+                policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin));
+
+            options.AddPolicy(AuthorizationPolicies.CanViewProducts, policy =>
+                policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin, RoleNames.SalesEmployee));
+
+            options.AddPolicy(AuthorizationPolicies.CanManageProducts, policy =>
+                policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin));
+
+            options.AddPolicy(AuthorizationPolicies.CanViewTransporters, policy =>
+                policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin, RoleNames.SalesEmployee, RoleNames.DispatchUser));
+
+            options.AddPolicy(AuthorizationPolicies.CanManageTransporters, policy =>
+                policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin));
+
+            options.AddPolicy(AuthorizationPolicies.CanViewPaymentConditions, policy =>
+                policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin, RoleNames.SalesEmployee));
+
+            options.AddPolicy(AuthorizationPolicies.CanManagePaymentConditions, policy =>
+                policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin));
+
+            options.AddPolicy(AuthorizationPolicies.CanViewUsers, policy =>
+                policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin));
+
+            options.AddPolicy(AuthorizationPolicies.CanManageUsers, policy =>
+                policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin));
+
+            options.AddPolicy(AuthorizationPolicies.CanViewOrders, policy =>
+                policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin, RoleNames.SalesEmployee, RoleNames.DispatchUser));
+
+            options.AddPolicy(AuthorizationPolicies.CanCreateOrders, policy =>
+                policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin, RoleNames.SalesEmployee));
+
+            options.AddPolicy(AuthorizationPolicies.CanRequestOrderModification, policy =>
+                policy.RequireRole(RoleNames.SalesEmployee));
+
+            options.AddPolicy(AuthorizationPolicies.CanReviewOrderModifications, policy =>
+                policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin));
+
+            options.AddPolicy(AuthorizationPolicies.CanMarkReadyToDispatch, policy =>
+                policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin, RoleNames.DispatchUser));
+
+            options.AddPolicy(AuthorizationPolicies.CanDispatchOrders, policy =>
                 policy.RequireRole(RoleNames.SuperAdmin, RoleNames.CompanyAdmin, RoleNames.DispatchUser));
 
             options.FallbackPolicy = options.GetPolicy(AuthorizationPolicies.AuthenticatedUser);

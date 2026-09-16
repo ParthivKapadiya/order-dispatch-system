@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ToplandERP.Application.Abstractions;
+using ToplandERP.Application.Users;
+using ToplandERP.Infrastructure.Auditing;
 using ToplandERP.Infrastructure.Data;
 using ToplandERP.Infrastructure.Identity;
 using ToplandERP.Infrastructure.Options;
@@ -49,6 +51,9 @@ public static class DependencyInjection
 
         services.AddScoped<DatabaseSeeder>();
         services.AddScoped<IFileStorage, LocalFileStorage>();
+        services.AddScoped<IAuditLogger, AuditLogger>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IUserDirectory, IdentityUserDirectory>();
 
         return services;
     }

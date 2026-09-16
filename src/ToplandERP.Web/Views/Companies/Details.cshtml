@@ -1,0 +1,16 @@
+@model CompanyDto
+<div class="page-header">
+    <div>
+        <h1>@Model.Name</h1>
+        <p class="text-muted mb-0"><code>@Model.Code</code></p>
+    </div>
+    <a class="btn btn-secondary" asp-action="Index">Back</a>
+</div>
+<section class="card-panel">
+    <dl class="detail-list">
+        <dt>Status</dt><dd><partial name="_StatusBadge" model="Model.IsActive" /></dd>
+        <dt>Address</dt><dd>@(Model.Address ?? "—")</dd>
+        <dt>Phone</dt><dd>@(Model.Phone ?? "—")</dd>
+        <dt>Email</dt><dd>@(Model.Email ?? "—")</dd>
+    </dl>
+</section>

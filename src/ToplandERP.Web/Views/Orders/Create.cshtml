@@ -1,0 +1,329 @@
+@model CreateOrderRequest
+@using ToplandERP.Application.Orders
+@{
+    var catalog = ViewBag.Catalog as OrderCreateCatalog ?? new OrderCreateCatalog();
+}
+
+<div class="page-header">
+    <div>
+        <h1>Create order</h1>
+        <p class="text-muted mb-0">Select a customer, confirm addresses, add products, then save. The order is created as Order Received.</p>
+    </div>
+</div>
+
+<section class="card-panel">
+    <form asp-action="Create" method="post" id="createOrderForm" novalidate>
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        <partial name="_CompanySelect" model="Model.CompanyId" />
+        @if (CurrentUser.IsSuperAdmin)
+        {
+            <div class="form-text mb-3">Changing company reloads customers, products, transporters, and payment conditions.</div>
+        }
+
+        <div class="panel-header mt-2">
+            <h2>1. Customer</h2>
+            <p>Only active customers from your company are listed.</p>
+        </div>
+        <div class="mb-4">
+            <label asp-for="CustomerId" class="form-label required">Customer</label>
+            <select asp-for="CustomerId" class="form-select" id="CustomerId">
+                <option value="">Select customer</option>
+                @foreach (var customer in catalog.Customers)
+                {
+                    <option value="@customer.Id"
+                            data-company="@customer.CompanyId"
+                            data-mobile="@customer.Mobile"
+                            data-b-address="@customer.BillingAddress"
+                            data-b-city="@customer.BillingCity"
+                            data-b-state="@customer.BillingState"
+                            data-b-pincode="@customer.BillingPincode"
+                            data-d-address="@customer.DeliveryAddress"
+                            data-d-city="@customer.DeliveryCity"
+                            data-d-state="@customer.DeliveryState"
+                            data-d-pincode="@customer.DeliveryPincode">
+                        @customer.Name (@customer.Code)
+                    </option>
+                }
+            </select>
+            <span asp-validation-for="CustomerId" class="invalid-feedback d-block"></span>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="card-panel h-100">
+                    <div class="panel-header">
+                        <h2>2. Billing address</h2>
+                        <p>Copied from the customer. Edit only if this order is different.</p>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="BillingAddress" class="form-label required">Address</label>
+                        <textarea asp-for="BillingAddress" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="BillingAddress" class="invalid-feedback d-block"></span>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="BillingCity" class="form-label required">City</label>
+                            <input asp-for="BillingCity" class="form-control" />
+                            <span asp-validation-for="BillingCity" class="invalid-feedback d-block"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="BillingState" class="form-label required">State</label>
+                            <input asp-for="BillingState" class="form-control" />
+                            <span asp-validation-for="BillingState" class="invalid-feedback d-block"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="BillingPincode" class="form-label required">Pincode</label>
+                            <input asp-for="BillingPincode" class="form-control" />
+                            <span asp-validation-for="BillingPincode" class="invalid-feedback d-block"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card-panel h-100">
+                    <div class="panel-header d-flex justify-content-between">
+                        <div>
+                            <h2>3. Delivery address</h2>
+                            <p>Kept separate from billing. Example: Ahmedabad billing, Rajkot delivery.</p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="DeliveryAddress" class="form-label required">Address</label>
+                        <textarea asp-for="DeliveryAddress" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="DeliveryAddress" class="invalid-feedback d-block"></span>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="DeliveryCity" class="form-label required">City</label>
+                            <input asp-for="DeliveryCity" class="form-control" />
+                            <span asp-validation-for="DeliveryCity" class="invalid-feedback d-block"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="DeliveryState" class="form-label required">State</label>
+                            <input asp-for="DeliveryState" class="form-control" />
+                            <span asp-validation-for="DeliveryState" class="invalid-feedback d-block"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="DeliveryPincode" class="form-label required">Pincode</label>
+                            <input asp-for="DeliveryPincode" class="form-control" />
+                            <span asp-validation-for="DeliveryPincode" class="invalid-feedback d-block"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-header">
+            <h2>4. Products</h2>
+            <p>Add one or more products. Seven or more lines are allowed.</p>
+        </div>
+        @if (CurrentUser.IsSuperAdmin && (Model.CompanyId is null || Model.CompanyId == Guid.Empty))
+        {
+            <div class="alert alert-warning">Select a company above to load that company's products.</div>
+        }
+        else if (catalog.Products.Count == 0)
+        {
+            <div class="alert alert-warning">
+                No products exist for this company yet.
+                @if (User.IsInRole(RoleNames.SuperAdmin) || User.IsInRole(RoleNames.CompanyAdmin))
+                {
+                    <a asp-controller="Products" asp-action="Create">Create a product</a>
+                    <span> then return here.</span>
+                }
+                else
+                {
+                    <span>Ask a company admin to add products, then refresh this page.</span>
+                }
+            </div>
+        }
+        <div class="table-responsive mb-3">
+            <table class="table align-middle" id="orderItemsTable">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th style="width: 8rem;">Qty</th>
+                        <th style="width: 4rem;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @for (var index = 0; index < Model.Items.Count; index++)
+                {
+                    <tr class="order-item-row">
+                        <td>
+                            <select name="Items[@index].ProductId" class="form-select product-select">
+                                <option value="">Select product</option>
+                                @foreach (var product in catalog.Products)
+                                {
+                                    if (Model.Items[index].ProductId == product.Id)
+                                    {
+                                        <option value="@product.Id" selected data-model="@product.Extra">@product.Name (@product.Code) @(string.IsNullOrWhiteSpace(product.Extra) ? "" : $"· {product.Extra}")</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@product.Id" data-model="@product.Extra">@product.Name (@product.Code) @(string.IsNullOrWhiteSpace(product.Extra) ? "" : $"· {product.Extra}")</option>
+                                    }
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <input name="Items[@index].Quantity" class="form-control" type="number" min="0" step="0.001" value="@(Model.Items[index].Quantity == 0 ? "" : Model.Items[index].Quantity.ToString("0.###"))" />
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger remove-item" type="button" aria-label="Remove line">×</button>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        <button class="btn btn-secondary btn-sm mb-4" type="button" id="addOrderItem">Add product line</button>
+        <span asp-validation-for="Items" class="invalid-feedback d-block mb-3"></span>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label asp-for="BillAmount" class="form-label required">5. Bill amount</label>
+                <input asp-for="BillAmount" class="form-control" type="number" min="0" step="0.01" />
+                <span asp-validation-for="BillAmount" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="PaymentConditionId" class="form-label required">6. Payment condition</label>
+                <select asp-for="PaymentConditionId" class="form-select">
+                    <option value="">Select payment condition</option>
+                    @foreach (var item in catalog.PaymentConditions)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="PaymentConditionId" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="TransporterId" class="form-label required">7. Transporter</label>
+                <select asp-for="TransporterId" class="form-select">
+                    <option value="">Select transporter</option>
+                    @foreach (var item in catalog.Transporters)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="TransporterId" class="invalid-feedback d-block"></span>
+            </div>
+        </div>
+
+        <div class="panel-header">
+            <h2>8. Booking details</h2>
+            <p>LR / CN and route details used later at dispatch.</p>
+        </div>
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label asp-for="BookingNumber" class="form-label">Booking / LR number</label>
+                <input asp-for="BookingNumber" class="form-control" />
+                <span asp-validation-for="BookingNumber" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="BookingDate" class="form-label">Booking date</label>
+                <input asp-for="BookingDate" class="form-control" type="date" />
+                <span asp-validation-for="BookingDate" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="BookingFrom" class="form-label">From</label>
+                <input asp-for="BookingFrom" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="BookingTo" class="form-label">To</label>
+                <input asp-for="BookingTo" class="form-control" />
+            </div>
+            <div class="col-12">
+                <label asp-for="BookingDetails" class="form-label">Booking notes</label>
+                <textarea asp-for="BookingDetails" class="form-control" rows="2"></textarea>
+            </div>
+        </div>
+
+        <div class="panel-header">
+            <h2>9. Remarks / special instructions</h2>
+        </div>
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label asp-for="Remarks" class="form-label">Remarks</label>
+                <textarea asp-for="Remarks" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="SpecialInstructions" class="form-label">Special instructions</label>
+                <textarea asp-for="SpecialInstructions" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Create order</button>
+            <a class="btn btn-secondary" asp-action="Index">Cancel</a>
+        </div>
+    </form>
+</section>
+
+<template id="orderItemTemplate">
+    <tr class="order-item-row">
+        <td>
+            <select name="Items[__index__].ProductId" class="form-select product-select">
+                <option value="">Select product</option>
+                @foreach (var product in catalog.Products)
+                {
+                    <option value="@product.Id" data-model="@product.Extra">@product.Name (@product.Code) @(string.IsNullOrWhiteSpace(product.Extra) ? "" : $"· {product.Extra}")</option>
+                }
+            </select>
+        </td>
+        <td>
+            <input name="Items[__index__].Quantity" class="form-control" type="number" min="0" step="0.001" />
+        </td>
+        <td>
+            <button class="btn btn-sm btn-outline-danger remove-item" type="button" aria-label="Remove line">×</button>
+        </td>
+    </tr>
+</template>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const customerSelect = document.getElementById("CustomerId");
+        const fillAddress = () => {
+            const option = customerSelect.options[customerSelect.selectedIndex];
+            if (!option || !option.value) return;
+            document.getElementById("BillingAddress").value = option.dataset.bAddress || "";
+            document.getElementById("BillingCity").value = option.dataset.bCity || "";
+            document.getElementById("BillingState").value = option.dataset.bState || "";
+            document.getElementById("BillingPincode").value = option.dataset.bPincode || "";
+            document.getElementById("DeliveryAddress").value = option.dataset.dAddress || "";
+            document.getElementById("DeliveryCity").value = option.dataset.dCity || "";
+            document.getElementById("DeliveryState").value = option.dataset.dState || "";
+            document.getElementById("DeliveryPincode").value = option.dataset.dPincode || "";
+        };
+        customerSelect?.addEventListener("change", fillAddress);
+
+        const companySelect = document.getElementById("CompanyId");
+        companySelect?.addEventListener("change", () => {
+            const companyId = companySelect.value;
+            if (!companyId) return;
+            window.location = "@Url.Action("Create")?companyId=" + encodeURIComponent(companyId);
+        });
+
+        const tbody = document.querySelector("#orderItemsTable tbody");
+        const template = document.getElementById("orderItemTemplate");
+        const reindex = () => {
+            [...tbody.querySelectorAll("tr")].forEach((row, index) => {
+                row.querySelectorAll("[name]").forEach(input => {
+                    input.name = input.name.replace(/Items\[\d+\]/, `Items[${index}]`);
+                });
+            });
+        };
+        document.getElementById("addOrderItem")?.addEventListener("click", () => {
+            const html = template.innerHTML.replaceAll("__index__", tbody.querySelectorAll("tr").length);
+            tbody.insertAdjacentHTML("beforeend", html);
+            reindex();
+        });
+        tbody?.addEventListener("click", event => {
+            if (!event.target.closest(".remove-item")) return;
+            const rows = tbody.querySelectorAll("tr");
+            if (rows.length <= 1) return;
+            event.target.closest("tr").remove();
+            reindex();
+        });
+    </script>
+}

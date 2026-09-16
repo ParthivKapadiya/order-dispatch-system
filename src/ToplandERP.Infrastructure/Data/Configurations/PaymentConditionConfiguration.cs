@@ -25,6 +25,6 @@ public sealed class PaymentConditionConfiguration : IEntityTypeConfiguration<Pay
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(entity => entity.CompanyId);
-        builder.HasIndex(entity => new { entity.CompanyId, entity.Name });
+        builder.HasIndex(entity => new { entity.CompanyId, entity.Name }).IsUnique();
     }
 }

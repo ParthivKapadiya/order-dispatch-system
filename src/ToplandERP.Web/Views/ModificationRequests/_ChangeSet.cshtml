@@ -1,0 +1,25 @@
+@model OrderChangeSet
+<dl class="detail-list">
+    <dt>Bill amount</dt><dd>₹ @Model.BillAmount.ToString("N2")</dd>
+    <dt>Payment</dt><dd>@Model.PaymentConditionName</dd>
+    <dt>Transporter</dt><dd>@Model.TransporterName</dd>
+    <dt>Billing</dt><dd>@Model.BillingAddress, @Model.BillingCity, @Model.BillingState @Model.BillingPincode</dd>
+    <dt>Delivery</dt><dd>@Model.DeliveryAddress, @Model.DeliveryCity, @Model.DeliveryState @Model.DeliveryPincode</dd>
+    <dt>Booking</dt><dd>@(string.IsNullOrWhiteSpace(Model.BookingNumber) ? "—" : Model.BookingNumber)</dd>
+    <dt>Remarks</dt><dd>@(string.IsNullOrWhiteSpace(Model.Remarks) ? "—" : Model.Remarks)</dd>
+    <dt>Special instructions</dt><dd>@(string.IsNullOrWhiteSpace(Model.SpecialInstructions) ? "—" : Model.SpecialInstructions)</dd>
+</dl>
+<table class="table table-sm mt-2 mb-0">
+    <thead>
+        <tr><th>Product</th><th class="text-end">Qty</th></tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Items)
+    {
+        <tr>
+            <td>@item.ProductName (@item.ProductCode) @(string.IsNullOrWhiteSpace(item.ModelNumber) ? "" : $"· {item.ModelNumber}")</td>
+            <td class="text-end">@item.Quantity.ToString("0.###")</td>
+        </tr>
+    }
+    </tbody>
+</table>

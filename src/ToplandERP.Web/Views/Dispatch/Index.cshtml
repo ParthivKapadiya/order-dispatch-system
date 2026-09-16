@@ -1,0 +1,74 @@
+@model PagedResult<DispatchDto>
+@{
+    var query = ViewBag.Query as DispatchListQuery ?? new DispatchListQuery();
+    var companies = ViewBag.Companies as IReadOnlyList<CompanyDto> ?? [];
+}
+<div class="page-header">
+    <div>
+        <h1>Dispatch</h1>
+        <p class="text-muted mb-0">Orders that are Ready to Dispatch. Open an order, enter dispatch details, then mark Dispatch Done.</p>
+    </div>
+</div>
+<section class="card-panel">
+    @if (CurrentUser.IsSuperAdmin)
+    {
+        <form method="get" class="table-toolbar">
+            <select class="form-select" name="CompanyId" style="max-width: 16rem;">
+                <option value="">All companies</option>
+                @foreach (var company in companies)
+                {
+                    if (query.CompanyId == company.Id)
+                    {
+                        <option value="@company.Id" selected>@company.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@company.Id">@company.Name</option>
+                    }
+                }
+            </select>
+            <button class="btn btn-secondary" type="submit">Filter</button>
+        </form>
+    }
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Order no.</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    @if (CurrentUser.IsSuperAdmin) { <th>Company</th> }
+                    <th>Products</th>
+                    <th>Transporter</th>
+                    <th>Booking</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Model.Items.Count == 0)
+            {
+                <tr><td colspan="9" class="text-muted">No orders are ready to dispatch.</td></tr>
+            }
+            else
+            {
+                foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td><code>@item.OrderNumber</code></td>
+                        <td>@(item.OrderedAt?.ToLocalTime().ToString("dd MMM yyyy") ?? "—")</td>
+                        <td>@item.CustomerName</td>
+                        @if (CurrentUser.IsSuperAdmin) { <td>@item.CompanyCode</td> }
+                        <td>@item.ProductSummary</td>
+                        <td>@(string.IsNullOrWhiteSpace(item.TransporterName) ? "—" : item.TransporterName)</td>
+                        <td>@(item.BookingNumber ?? "—")</td>
+                        <td><span class="status-badge status-ready">@item.StatusLabel</span></td>
+                        <td class="text-end"><a class="btn btn-sm btn-success" asp-action="Open" asp-route-orderId="@item.OrderId">Open Dispatch</a></td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+    <partial name="_Pagination" model="Model" />
+</section>

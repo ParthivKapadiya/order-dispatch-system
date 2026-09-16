@@ -1,0 +1,52 @@
+@model UpdateUserRequest
+@{
+    var roles = ViewBag.Roles as IReadOnlyList<string> ?? [];
+}
+<div class="page-header">
+    <div>
+        <h1>Edit employee</h1>
+        <p class="text-muted mb-0">Company cannot be changed from this screen.</p>
+    </div>
+</div>
+<section class="card-panel">
+    <form asp-action="Edit" method="post" novalidate>
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="FullName" class="form-label required">Full name</label>
+                <input asp-for="FullName" class="form-control" autofocus />
+                <span asp-validation-for="FullName" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="EmployeeCode" class="form-label required">Employee code</label>
+                <input asp-for="EmployeeCode" class="form-control" />
+                <span asp-validation-for="EmployeeCode" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Email" class="form-label required">Email</label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Mobile" class="form-label required">Mobile</label>
+                <input asp-for="Mobile" class="form-control" />
+                <span asp-validation-for="Mobile" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Role" class="form-label required">Role</label>
+                <select asp-for="Role" class="form-select">
+                    @foreach (var role in roles)
+                    {
+                        <option value="@role">@role</option>
+                    }
+                </select>
+                <span asp-validation-for="Role" class="invalid-feedback d-block"></span>
+            </div>
+        </div>
+        <div class="mt-4 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Save changes</button>
+            <a class="btn btn-secondary" asp-action="Index">Cancel</a>
+        </div>
+    </form>
+</section>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

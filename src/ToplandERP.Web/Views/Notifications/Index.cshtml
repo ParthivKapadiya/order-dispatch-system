@@ -1,0 +1,49 @@
+@using ToplandERP.Application.Notifications
+@model PagedResult<NotificationDto>
+
+<div class="page-header">
+    <div>
+        <h1>Notifications</h1>
+        <p class="text-muted mb-0">Internal ERP alerts for orders, dispatch, and modification requests. These are not customer messages.</p>
+    </div>
+    <form asp-action="MarkAllAsRead" method="post">
+        <button class="btn btn-secondary" type="submit">Mark all as read</button>
+    </form>
+</div>
+
+<section class="card-panel">
+    @if (Model.Items.Count == 0)
+    {
+        <p class="text-muted mb-0">You have no notifications yet.</p>
+    }
+    else
+    {
+        <div class="notification-list">
+            @foreach (var item in Model.Items)
+            {
+                <article class="notification-row @(item.IsRead ? "is-read" : "is-unread")">
+                    <div class="notification-row-body">
+                        <span class="notification-status-dot" aria-hidden="true"></span>
+                        <div>
+                            <h2 class="notification-title">@item.Title</h2>
+                            <p class="notification-message mb-1">@item.Message</p>
+                            <span class="text-muted small">@item.RelativeTime</span>
+                        </div>
+                    </div>
+                    <div class="notification-row-actions">
+                        <form asp-action="Open" asp-route-id="@item.Id" method="post">
+                            <button class="btn btn-sm btn-primary" type="submit">Open</button>
+                        </form>
+                        @if (!item.IsRead)
+                        {
+                            <form asp-action="MarkAsRead" asp-route-id="@item.Id" method="post">
+                                <button class="btn btn-sm btn-outline-secondary" type="submit">Mark as read</button>
+                            </form>
+                        }
+                    </div>
+                </article>
+            }
+        </div>
+        <partial name="_Pagination" model="Model" />
+    }
+</section>

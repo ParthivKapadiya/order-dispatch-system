@@ -1,0 +1,37 @@
+@using ToplandERP.Application.Companies
+@model Guid?
+@{
+    var companies = ViewBag.Companies as IReadOnlyList<CompanyDto> ?? [];
+    var lockCompany = ViewBag.LockCompany as bool? == true;
+}
+
+@if (lockCompany)
+{
+    <input type="hidden" name="CompanyId" value="@Model" />
+    var company = companies.FirstOrDefault(item => item.Id == Model);
+    <div class="mb-3">
+        <label class="form-label">Company</label>
+        <input class="form-control" value="@(company is null ? "Assigned automatically" : $"{company.Name} ({company.Code})")" disabled />
+        <div class="form-text">Company is assigned from your account and cannot be changed.</div>
+    </div>
+}
+else
+{
+    <div class="mb-3">
+        <label class="form-label required" for="CompanyId">Company</label>
+        <select name="CompanyId" id="CompanyId" class="form-select">
+            <option value="">Select company</option>
+            @foreach (var company in companies)
+            {
+                if (Model == company.Id)
+                {
+                    <option value="@company.Id" selected>@company.Name (@company.Code)</option>
+                }
+                else
+                {
+                    <option value="@company.Id">@company.Name (@company.Code)</option>
+                }
+            }
+        </select>
+    </div>
+}

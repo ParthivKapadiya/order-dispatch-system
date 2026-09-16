@@ -1,0 +1,85 @@
+@model PagedResult<ModificationRequestSummaryDto>
+@using ToplandERP.Domain.Enums
+@{
+    var query = ViewBag.Query as ModificationListQuery ?? new ModificationListQuery();
+    var companies = ViewBag.Companies as IReadOnlyList<CompanyDto> ?? [];
+}
+<div class="page-header">
+    <div>
+        <h1>Modification requests</h1>
+        <p class="text-muted mb-0">Approve or reject requested changes. Approving updates the order; rejecting leaves it unchanged.</p>
+    </div>
+</div>
+<section class="card-panel">
+    <form method="get" class="table-toolbar">
+        <select class="form-select" name="Status" style="max-width: 14rem;">
+            <option value="">All statuses</option>
+            @foreach (var status in new[] { ModificationRequestStatus.Pending, ModificationRequestStatus.Approved, ModificationRequestStatus.Rejected })
+            {
+                if (query.Status == status)
+                {
+                    <option value="@((int)status)" selected>@status</option>
+                }
+                else
+                {
+                    <option value="@((int)status)">@status</option>
+                }
+            }
+        </select>
+        @if (CurrentUser.IsSuperAdmin)
+        {
+            <select class="form-select" name="CompanyId" style="max-width: 16rem;">
+                <option value="">All companies</option>
+                @foreach (var company in companies)
+                {
+                    if (query.CompanyId == company.Id)
+                    {
+                        <option value="@company.Id" selected>@company.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@company.Id">@company.Name</option>
+                    }
+                }
+            </select>
+        }
+        <button class="btn btn-secondary" type="submit">Filter</button>
+    </form>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Customer</th>
+                    @if (CurrentUser.IsSuperAdmin) { <th>Company</th> }
+                    <th>Requested by</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Model.Items.Count == 0)
+            {
+                <tr><td colspan="7" class="text-muted">No modification requests match the current filters.</td></tr>
+            }
+            else
+            {
+                foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td><code>@item.OrderNumber</code></td>
+                        <td>@item.CustomerName</td>
+                        @if (CurrentUser.IsSuperAdmin) { <td>@item.CompanyCode</td> }
+                        <td>@item.RequestedByName</td>
+                        <td>@item.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                        <td><span class="status-badge @(item.Status == ModificationRequestStatus.Pending ? "status-pending" : item.Status == ModificationRequestStatus.Approved ? "status-approved" : "status-rejected")">@item.StatusLabel</span></td>
+                        <td class="text-end"><a class="btn btn-sm btn-secondary" asp-action="Details" asp-route-id="@item.Id">View</a></td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+    <partial name="_Pagination" model="Model" />
+</section>

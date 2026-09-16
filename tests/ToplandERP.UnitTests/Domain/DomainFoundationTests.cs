@@ -1,6 +1,7 @@
 using FluentAssertions;
 using ToplandERP.Domain.Constants;
 using ToplandERP.Domain.Entities;
+using ToplandERP.Domain.Enums;
 
 namespace ToplandERP.UnitTests.Domain;
 
@@ -42,5 +43,19 @@ public class DomainFoundationTests
     {
         SeedIdentifiers.GravisCompanyId.Should().NotBe(Guid.Empty);
         SeedIdentifiers.JeekoCompanyId.Should().NotBe(SeedIdentifiers.ShreeCompanyId);
+    }
+
+    [Fact]
+    public void Notification_types_cover_the_phase_4_events()
+    {
+        Enum.GetValues<NotificationType>().Should().BeEquivalentTo(
+        [
+            NotificationType.OrderCreated,
+            NotificationType.OrderReadyToDispatch,
+            NotificationType.OrderDispatched,
+            NotificationType.ModificationRequested,
+            NotificationType.ModificationApproved,
+            NotificationType.ModificationRejected
+        ]);
     }
 }

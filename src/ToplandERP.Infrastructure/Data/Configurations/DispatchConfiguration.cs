@@ -12,6 +12,16 @@ public sealed class DispatchConfiguration : IEntityTypeConfiguration<Dispatch>
 
         builder.HasKey(entity => entity.Id);
 
+        builder.Property(entity => entity.DispatchPersonName)
+            .IsRequired()
+            .HasMaxLength(200);
+
+        builder.Property(entity => entity.LrNumber)
+            .HasMaxLength(80);
+
+        builder.Property(entity => entity.BookingNumber)
+            .HasMaxLength(80);
+
         builder.Property(entity => entity.Notes)
             .HasMaxLength(2000);
 
@@ -26,6 +36,6 @@ public sealed class DispatchConfiguration : IEntityTypeConfiguration<Dispatch>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(entity => entity.CompanyId);
-        builder.HasIndex(entity => entity.OrderId);
+        builder.HasIndex(entity => entity.OrderId).IsUnique();
     }
 }

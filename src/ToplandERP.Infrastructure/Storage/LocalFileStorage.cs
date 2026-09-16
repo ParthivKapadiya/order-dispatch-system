@@ -49,14 +49,14 @@ public sealed class LocalFileStorage : IFileStorage
         }
 
         var extension = Path.GetExtension(safeOriginalName);
-        if (!AllowedExtensions.Contains(extension))
+        if (!AllowedExtensions.Contains(extension) || !IsAllowedContentType(extension, contentType))
         {
-            throw new InvalidOperationException("This file type is not allowed.");
+            throw new InvalidOperationException("Invalid file type.");
         }
 
         if (content.CanSeek && content.Length > _maxFileSizeBytes)
         {
-            throw new InvalidOperationException("The file exceeds the maximum allowed size.");
+            throw new InvalidOperationException("File size exceeds the allowed limit.");
         }
 
         Directory.CreateDirectory(_rootPath);
@@ -71,7 +71,7 @@ public sealed class LocalFileStorage : IFileStorage
             {
                 fileStream.Close();
                 File.Delete(fullPath);
-                throw new InvalidOperationException("The file exceeds the maximum allowed size.");
+                throw new InvalidOperationException("File size exceeds the allowed limit.");
             }
         }
 
@@ -95,5 +95,41 @@ public sealed class LocalFileStorage : IFileStorage
         }
 
         return Task.CompletedTask;
+    }
+
+    public Task<Stream> OpenReadAsync(string storedPath, CancellationToken cancellationToken = default)
+    {
+        var safeName = Path.GetFileName(storedPath);
+        if (string.IsNullOrWhiteSpace(safeName))
+        {
+            throw new FileNotFoundException("The requested file was not found.");
+        }
+
+        var fullPath = Path.Combine(_rootPath, safeName);
+        if (!File.Exists(fullPath))
+        {
+            throw new FileNotFoundException("The requested file was not found.");
+        }
+
+        Stream stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true);
+        return Task.FromResult(stream);
+    }
+
+    private static bool IsAllowedContentType(string extension, string contentType)
+    {
+        if (string.IsNullOrWhiteSpace(contentType))
+        {
+            return true;
+        }
+
+        var normalized = contentType.Split(';', 2)[0].Trim().ToLowerInvariant();
+        return extension.ToLowerInvariant() switch
+        {
+            ".jpg" or ".jpeg" => normalized is "image/jpeg" or "image/jpg" or "image/pjpeg",
+            ".png" => normalized == "image/png",
+            ".webp" => normalized == "image/webp",
+            ".pdf" => normalized == "application/pdf",
+            _ => false
+        };
     }
 }

@@ -1,0 +1,114 @@
+@using ToplandERP.Application.Companies
+@using ToplandERP.Application.Orders
+@using ToplandERP.Domain.Enums
+@model PagedResult<OrderDto>
+@{
+    var query = ViewBag.Query as OrderListQuery ?? new OrderListQuery();
+    var companies = ViewBag.Companies as IReadOnlyList<CompanyDto> ?? [];
+    var canCreate = ViewBag.CanCreate as bool? == true;
+}
+
+<div class="page-header">
+    <div>
+        <h1>Orders</h1>
+        <p class="text-muted mb-0">Sales orders are created as <strong>Order Received</strong>. Dispatch is not part of this step.</p>
+    </div>
+    @if (canCreate)
+    {
+        <a class="btn btn-primary" asp-action="Create">Create order</a>
+    }
+</div>
+
+<section class="card-panel">
+    <form method="get" class="table-toolbar">
+        <input class="form-control search-input" type="search" name="Search" value="@query.Search" placeholder="Search number, customer, mobile" />
+        <select class="form-select" name="Status" style="max-width: 16rem;">
+            <option value="">All statuses</option>
+            @if (query.Status == OrderStatus.Received)
+            {
+                <option value="@((int)OrderStatus.Received)" selected>Order Received</option>
+            }
+            else
+            {
+                <option value="@((int)OrderStatus.Received)">Order Received</option>
+            }
+            @if (query.Status == OrderStatus.ReadyToDispatch)
+            {
+                <option value="@((int)OrderStatus.ReadyToDispatch)" selected>Ready to Dispatch</option>
+            }
+            else
+            {
+                <option value="@((int)OrderStatus.ReadyToDispatch)">Ready to Dispatch</option>
+            }
+            @if (query.Status == OrderStatus.DispatchDone)
+            {
+                <option value="@((int)OrderStatus.DispatchDone)" selected>Dispatch Done</option>
+            }
+            else
+            {
+                <option value="@((int)OrderStatus.DispatchDone)">Dispatch Done</option>
+            }
+        </select>
+        @if (CurrentUser.IsSuperAdmin)
+        {
+            <select class="form-select" name="CompanyId" style="max-width: 16rem;">
+                <option value="">All companies</option>
+                @foreach (var company in companies)
+                {
+                    if (query.CompanyId == company.Id)
+                    {
+                        <option value="@company.Id" selected>@company.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@company.Id">@company.Name</option>
+                    }
+                }
+            </select>
+        }
+        <button class="btn btn-secondary" type="submit">Filter</button>
+    </form>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Order no.</th>
+                    <th>Customer</th>
+                    @if (CurrentUser.IsSuperAdmin) { <th>Company</th> }
+                    <th>Bill amount</th>
+                    <th>Payment</th>
+                    <th>Transporter</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Model.Items.Count == 0)
+            {
+                <tr><td colspan="9" class="text-muted">No orders match the current filters.</td></tr>
+            }
+            else
+            {
+                foreach (var order in Model.Items)
+                {
+                    <tr>
+                        <td><code>@order.OrderNumber</code></td>
+                        <td>@order.CustomerName</td>
+                        @if (CurrentUser.IsSuperAdmin) { <td>@order.CompanyCode</td> }
+                        <td>@order.BillAmount.ToString("N2")</td>
+                        <td>@(string.IsNullOrWhiteSpace(order.PaymentConditionName) ? "—" : order.PaymentConditionName)</td>
+                        <td>@(string.IsNullOrWhiteSpace(order.TransporterName) ? "—" : order.TransporterName)</td>
+                        <td>
+                            <span class="status-badge @(order.Status == OrderStatus.Received ? "status-received" : order.Status == OrderStatus.ReadyToDispatch ? "status-ready" : "status-done")">@order.StatusLabel</span>
+                        </td>
+                        <td>@(order.OrderedAt?.ToLocalTime().ToString("dd MMM yyyy HH:mm") ?? "—")</td>
+                        <td class="text-end"><a class="btn btn-sm btn-secondary" asp-action="Details" asp-route-id="@order.Id">View</a></td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+    <partial name="_Pagination" model="Model" />
+</section>

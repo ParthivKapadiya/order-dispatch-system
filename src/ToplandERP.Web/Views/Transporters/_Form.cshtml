@@ -1,0 +1,25 @@
+@model TransporterWriteRequest
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+<partial name="_CompanySelect" model="Model.CompanyId" />
+<div class="row g-3">
+    <div class="col-md-6">
+        <label asp-for="Name" class="form-label required">Name</label>
+        <input asp-for="Name" class="form-control" autofocus />
+        <span asp-validation-for="Name" class="invalid-feedback d-block"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="ContactPerson" class="form-label">Contact person</label>
+        <input asp-for="ContactPerson" class="form-control" />
+        <span asp-validation-for="ContactPerson" class="invalid-feedback d-block"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Mobile" class="form-label">Mobile</label>
+        <input asp-for="Mobile" class="form-control" />
+        <span asp-validation-for="Mobile" class="invalid-feedback d-block"></span>
+    </div>
+    <div class="col-12">
+        <label asp-for="Address" class="form-label">Address</label>
+        <textarea asp-for="Address" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Address" class="invalid-feedback d-block"></span>
+    </div>
+</div>

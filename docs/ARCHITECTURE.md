@@ -35,7 +35,7 @@ ToplandERP/
 
 **Domain** holds entities, enums, constants, and company-access rules. It has no ASP.NET or EF UI dependencies.
 
-**Application** holds use cases, DTOs, validators (as they are added), and abstractions such as `IApplicationDbContext`, `ICurrentUser`, and `IFileStorage`.
+**Application** holds use cases, DTOs, validators, and abstractions such as `IApplicationDbContext`, `ICurrentUser`, `IFileStorage`, and `INotificationService`.
 
 **Infrastructure** holds EF Core, Identity persistence, seeding, SQL Server configuration, and local file storage.
 
@@ -102,16 +102,20 @@ Core tables are created now so later phases can add columns and behavior without
 - `/Health` is an authenticated status page
 - Logging uses the built-in ASP.NET Core providers
 
+## Implemented phases
+
+0. Foundation
+1. Customer, product, transporter, payment-condition, and employee masters
+2. Order capture (status starts as Order Received)
+3. Order modification requests/approvals and dispatch workflow with document upload
+4. Internal in-app notifications (database-backed ERP inbox; no WhatsApp/SMS/email)
+
 ## Future development phases
 
 These are planned, not implemented:
 
-1. Customer, product, transporter, and payment-condition masters
-2. Order capture and company-scoped order lists
-3. Order modification requests and approvals
-4. Dispatch workflow and document/photo upload
-5. Notifications (in-app first; WhatsApp/SMS only if later confirmed)
-6. Operational reports
+5. Operational reports
+6. External customer messaging (WhatsApp/SMS/email) only if later confirmed — must not replace the in-app inbox
 
 Deferred decisions (do not invent business rules until confirmed):
 

@@ -8,11 +8,17 @@ public class Product : BaseEntity, ICompanyScoped
 
     public Company Company { get; set; } = null!;
 
-    public string Name { get; set; } = string.Empty;
+    public string ProductCode { get; set; } = string.Empty;
 
-    public string? Code { get; set; }
+    public string ProductName { get; set; } = string.Empty;
+
+    public string? Category { get; set; }
+
+    public string? ModelNumber { get; set; }
 
     public string? Description { get; set; }
+
+    public string? Unit { get; set; }
 
     public bool IsActive { get; set; } = true;
 }

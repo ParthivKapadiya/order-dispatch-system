@@ -34,9 +34,13 @@ public sealed class DatabaseSeeder
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
         await EnsureDatabaseCreatedAsync(cancellationToken);
+        await SqliteSchemaPatcher.ApplyAsync(_dbContext, cancellationToken);
         await SeedCompaniesAsync(cancellationToken);
         await SeedRolesAsync();
         await SeedSuperAdminAsync();
+        await SeedPaymentConditionsAsync(cancellationToken);
+        await SeedProductsAsync(cancellationToken);
+        await SeedTransportersAsync(cancellationToken);
     }
 
     private async Task EnsureDatabaseCreatedAsync(CancellationToken cancellationToken)
@@ -133,6 +137,12 @@ public sealed class DatabaseSeeder
                 await _userManager.AddToRoleAsync(existing, RoleNames.SuperAdmin);
             }
 
+            if (string.IsNullOrWhiteSpace(existing.EmployeeCode))
+            {
+                existing.EmployeeCode = "SA-0001";
+                await _userManager.UpdateAsync(existing);
+            }
+
             return;
         }
 
@@ -151,6 +161,7 @@ public sealed class DatabaseSeeder
             Email = options.Email,
             EmailConfirmed = true,
             FullName = string.IsNullOrWhiteSpace(options.FullName) ? "System Administrator" : options.FullName,
+            EmployeeCode = "SA-0001",
             CompanyId = null,
             IsActive = true
         };
@@ -168,6 +179,108 @@ public sealed class DatabaseSeeder
         }
 
         _logger.LogInformation("Seeded SuperAdmin user {UserName}", userName);
+    }
+
+    private async Task SeedPaymentConditionsAsync(CancellationToken cancellationToken)
+    {
+        var names = new[] { "Cash", "Credit", "Advance", "Other" };
+        var companies = await _dbContext.Companies.IgnoreQueryFilters().ToListAsync(cancellationToken);
+
+        foreach (var company in companies)
+        {
+            foreach (var name in names)
+            {
+                var exists = await _dbContext.PaymentConditions
+                    .IgnoreQueryFilters()
+                    .AnyAsync(item => item.CompanyId == company.Id && item.Name == name, cancellationToken);
+                if (exists)
+                {
+                    continue;
+                }
+
+                _dbContext.PaymentConditions.Add(new PaymentCondition
+                {
+                    CompanyId = company.Id,
+                    Name = name,
+                    Description = "Development master value",
+                    IsActive = true
+                });
+            }
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task SeedProductsAsync(CancellationToken cancellationToken)
+    {
+        var catalog = new (string Code, string Name, string Category, string Model, string Unit)[]
+        {
+            ("TRACTOR-01", "Mini Tractor", "Tractor", "MT-250", "Nos"),
+            ("ROTAV-01", "Rotavator", "Implement", "RV-6", "Nos"),
+            ("TILLER-01", "Power Tiller", "Tiller", "PT-12", "Nos"),
+            ("SPRAY-01", "Boom Sprayer", "Sprayer", "BS-400", "Nos")
+        };
+        var companies = await _dbContext.Companies.IgnoreQueryFilters().ToListAsync(cancellationToken);
+
+        foreach (var company in companies)
+        {
+            foreach (var item in catalog)
+            {
+                var exists = await _dbContext.Products
+                    .IgnoreQueryFilters()
+                    .AnyAsync(product => product.CompanyId == company.Id && product.ProductCode == item.Code, cancellationToken);
+                if (exists)
+                {
+                    continue;
+                }
+
+                _dbContext.Products.Add(new Product
+                {
+                    CompanyId = company.Id,
+                    ProductCode = item.Code,
+                    ProductName = item.Name,
+                    Category = item.Category,
+                    ModelNumber = item.Model,
+                    Unit = item.Unit,
+                    Description = "Development catalog item",
+                    IsActive = true
+                });
+            }
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task SeedTransportersAsync(CancellationToken cancellationToken)
+    {
+        var names = new[] { "VRL Logistics", "Gati KWE", "Patel Roadways" };
+        var companies = await _dbContext.Companies.IgnoreQueryFilters().ToListAsync(cancellationToken);
+
+        foreach (var company in companies)
+        {
+            foreach (var name in names)
+            {
+                var exists = await _dbContext.Transporters
+                    .IgnoreQueryFilters()
+                    .AnyAsync(item => item.CompanyId == company.Id && item.Name == name, cancellationToken);
+                if (exists)
+                {
+                    continue;
+                }
+
+                _dbContext.Transporters.Add(new Transporter
+                {
+                    CompanyId = company.Id,
+                    Name = name,
+                    ContactPerson = "Dispatch desk",
+                    Mobile = "9876543210",
+                    Address = "Gujarat",
+                    IsActive = true
+                });
+            }
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private static string FormatIdentityErrors(IdentityResult result)

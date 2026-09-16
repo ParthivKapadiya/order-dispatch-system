@@ -1,0 +1,47 @@
+@using ToplandERP.Application.Notifications
+@inject INotificationService NotificationService
+@{
+    var unreadCount = 0;
+    IReadOnlyList<NotificationDto> recentNotifications = [];
+    if (CurrentUser.IsAuthenticated && CurrentUser.UserId.HasValue)
+    {
+        unreadCount = await NotificationService.GetUnreadCountAsync();
+        recentNotifications = await NotificationService.GetRecentAsync();
+    }
+}
+
+<div class="dropdown">
+    <button class="btn btn-icon notification-trigger" type="button" id="notificationBell"
+            data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+            title="Notifications" aria-label="Notifications">
+        <span class="notification-bell"></span>
+        <span id="notificationUnreadBadge" class="notification-count" data-unread="@unreadCount"
+              style="@(unreadCount == 0 ? "display:none" : null)">@unreadCount</span>
+    </button>
+    <div class="dropdown-menu dropdown-menu-end notification-menu" aria-labelledby="notificationBell">
+        <div class="notification-menu-header">
+            <strong>Notifications</strong>
+            <a asp-controller="Notifications" asp-action="Index">View all</a>
+        </div>
+        @if (recentNotifications.Count == 0)
+        {
+            <div class="notification-empty text-muted">No notifications yet.</div>
+        }
+        else
+        {
+            @foreach (var item in recentNotifications)
+            {
+                <form asp-controller="Notifications" asp-action="Open" asp-route-id="@item.Id" method="post">
+                    <button type="submit" class="dropdown-item notification-item @(item.IsRead ? "is-read" : "is-unread")">
+                        <span class="notification-item-title">@item.Title</span>
+                        <span class="notification-item-message">@item.Message</span>
+                        <span class="notification-item-time">@item.RelativeTime</span>
+                    </button>
+                </form>
+            }
+        }
+        <div class="notification-menu-footer">
+            <a asp-controller="Notifications" asp-action="Index">View all notifications</a>
+        </div>
+    </div>
+</div>

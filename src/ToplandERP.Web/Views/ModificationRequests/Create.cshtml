@@ -1,0 +1,172 @@
+@model CreateModificationRequest
+@{
+    var order = ViewBag.Order as OrderDto ?? new OrderDto();
+    var catalog = ViewBag.Catalog as OrderCreateCatalog ?? new OrderCreateCatalog();
+}
+<div class="page-header">
+    <div>
+        <h1>Request modification</h1>
+        <p class="text-muted mb-0">Submitting this does <strong>not</strong> change order @order.OrderNumber until an authorized user approves it.</p>
+    </div>
+</div>
+<section class="card-panel mb-3">
+    <p class="mb-1"><strong>Customer (not editable):</strong> @order.CustomerName (@order.CustomerCode)</p>
+    <p class="text-muted mb-0">Current products: @string.Join(", ", order.Items.Select(item => $"{item.ProductName} × {item.Quantity:0.###}"))</p>
+</section>
+<section class="card-panel">
+    <form asp-action="Create" asp-route-orderId="@order.Id" method="post" novalidate>
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        <div class="mb-3">
+            <label asp-for="Reason" class="form-label required">Reason for modification</label>
+            <textarea asp-for="Reason" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Reason" class="invalid-feedback d-block"></span>
+        </div>
+
+        <div class="panel-header"><h2>Requested products</h2><p>Add, remove, or change lines. At least one product is required.</p></div>
+        <div class="table-responsive mb-3">
+            <table class="table align-middle" id="orderItemsTable">
+                <thead><tr><th>Product</th><th style="width: 8rem;">Qty</th><th style="width: 4rem;"></th></tr></thead>
+                <tbody>
+                @for (var index = 0; index < Model.Items.Count; index++)
+                {
+                    <tr class="order-item-row">
+                        <td>
+                            <select name="Items[@index].ProductId" class="form-select">
+                                <option value="">Select product</option>
+                                @foreach (var product in catalog.Products)
+                                {
+                                    if (Model.Items[index].ProductId == product.Id)
+                                    {
+                                        <option value="@product.Id" selected>@product.Name (@product.Code)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@product.Id">@product.Name (@product.Code)</option>
+                                    }
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <input name="Items[@index].Quantity" class="form-control" type="number" min="0" step="0.001" value="@(Model.Items[index].Quantity == 0 ? "" : Model.Items[index].Quantity.ToString("0.###"))" />
+                        </td>
+                        <td><button class="btn btn-sm btn-outline-danger remove-item" type="button">×</button></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        <button class="btn btn-secondary btn-sm mb-4" type="button" id="addOrderItem">Add product line</button>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <label asp-for="BillAmount" class="form-label required">Bill amount</label>
+                <input asp-for="BillAmount" class="form-control" type="number" min="0" step="0.01" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="PaymentConditionId" class="form-label required">Payment condition</label>
+                <select asp-for="PaymentConditionId" class="form-select">
+                    <option value="">Select payment condition</option>
+                    @foreach (var item in catalog.PaymentConditions)
+                    {
+                        if (Model.PaymentConditionId == item.Id)
+                        {
+                            <option value="@item.Id" selected>@item.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="TransporterId" class="form-label required">Transporter</label>
+                <select asp-for="TransporterId" class="form-select">
+                    <option value="">Select transporter</option>
+                    @foreach (var item in catalog.Transporters)
+                    {
+                        if (Model.TransporterId == item.Id)
+                        {
+                            <option value="@item.Id" selected>@item.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label asp-for="BillingAddress" class="form-label required">Billing address</label>
+                <textarea asp-for="BillingAddress" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="DeliveryAddress" class="form-label required">Delivery address</label>
+                <textarea asp-for="DeliveryAddress" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="col-md-4"><label asp-for="BillingCity" class="form-label required">Billing city</label><input asp-for="BillingCity" class="form-control" /></div>
+            <div class="col-md-4"><label asp-for="BillingState" class="form-label required">Billing state</label><input asp-for="BillingState" class="form-control" /></div>
+            <div class="col-md-4"><label asp-for="BillingPincode" class="form-label required">Billing pincode</label><input asp-for="BillingPincode" class="form-control" /></div>
+            <div class="col-md-4"><label asp-for="DeliveryCity" class="form-label required">Delivery city</label><input asp-for="DeliveryCity" class="form-control" /></div>
+            <div class="col-md-4"><label asp-for="DeliveryState" class="form-label required">Delivery state</label><input asp-for="DeliveryState" class="form-control" /></div>
+            <div class="col-md-4"><label asp-for="DeliveryPincode" class="form-label required">Delivery pincode</label><input asp-for="DeliveryPincode" class="form-control" /></div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-4"><label asp-for="BookingNumber" class="form-label">Booking / LR number</label><input asp-for="BookingNumber" class="form-control" /></div>
+            <div class="col-md-4"><label asp-for="BookingDate" class="form-label">Booking date</label><input asp-for="BookingDate" class="form-control" type="date" /></div>
+            <div class="col-md-4"><label asp-for="BookingFrom" class="form-label">From</label><input asp-for="BookingFrom" class="form-control" /></div>
+            <div class="col-md-4"><label asp-for="BookingTo" class="form-label">To</label><input asp-for="BookingTo" class="form-control" /></div>
+            <div class="col-12"><label asp-for="BookingDetails" class="form-label">Booking notes</label><textarea asp-for="BookingDetails" class="form-control" rows="2"></textarea></div>
+            <div class="col-md-6"><label asp-for="Remarks" class="form-label">Remarks</label><textarea asp-for="Remarks" class="form-control" rows="2"></textarea></div>
+            <div class="col-md-6"><label asp-for="SpecialInstructions" class="form-label">Special instructions</label><textarea asp-for="SpecialInstructions" class="form-control" rows="2"></textarea></div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Submit Modification Request</button>
+            <a class="btn btn-secondary" asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id">Cancel</a>
+        </div>
+    </form>
+</section>
+<template id="orderItemTemplate">
+    <tr class="order-item-row">
+        <td>
+            <select name="Items[__index__].ProductId" class="form-select">
+                <option value="">Select product</option>
+                @foreach (var product in catalog.Products)
+                {
+                    <option value="@product.Id">@product.Name (@product.Code)</option>
+                }
+            </select>
+        </td>
+        <td><input name="Items[__index__].Quantity" class="form-control" type="number" min="0" step="0.001" /></td>
+        <td><button class="btn btn-sm btn-outline-danger remove-item" type="button">×</button></td>
+    </tr>
+</template>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const tbody = document.querySelector("#orderItemsTable tbody");
+        const template = document.getElementById("orderItemTemplate");
+        const reindex = () => {
+            [...tbody.querySelectorAll("tr")].forEach((row, index) => {
+                row.querySelectorAll("[name]").forEach(input => {
+                    input.name = input.name.replace(/Items\[\d+\]/, `Items[${index}]`);
+                });
+            });
+        };
+        document.getElementById("addOrderItem")?.addEventListener("click", () => {
+            tbody.insertAdjacentHTML("beforeend", template.innerHTML.replaceAll("__index__", tbody.querySelectorAll("tr").length));
+            reindex();
+        });
+        tbody?.addEventListener("click", event => {
+            if (!event.target.closest(".remove-item")) return;
+            if (tbody.querySelectorAll("tr").length <= 1) return;
+            event.target.closest("tr").remove();
+            reindex();
+        });
+    </script>
+}

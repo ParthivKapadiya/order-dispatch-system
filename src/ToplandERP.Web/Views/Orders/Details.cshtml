@@ -1,0 +1,210 @@
+@model OrderDto
+@using ToplandERP.Domain.Enums
+@{
+    var canRequest = ViewBag.CanRequestModification as bool? == true;
+    var canMarkReady = ViewBag.CanMarkReady as bool? == true;
+    var canOpenDispatch = ViewBag.CanOpenDispatch as bool? == true;
+}
+
+<div class="page-header">
+    <div>
+        <h1>@Model.OrderNumber</h1>
+        <p class="text-muted mb-0">@Model.CustomerName · @Model.CompanyName</p>
+    </div>
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+        <span class="status-badge @(Model.Status == OrderStatus.Received ? "status-received" : Model.Status == OrderStatus.ReadyToDispatch ? "status-ready" : "status-done")">@Model.StatusLabel</span>
+        @if (Model.IsLocked)
+        {
+            <span class="status-badge status-locked">Locked</span>
+        }
+        <a class="btn btn-secondary" asp-action="Index">Back to orders</a>
+    </div>
+</div>
+
+@if (Model.IsLocked)
+{
+    <div class="locked-banner">
+        <strong>Order locked.</strong> This order was dispatched and can no longer be modified.
+    </div>
+}
+
+<div class="d-flex gap-2 flex-wrap mb-3">
+    @if (canRequest && !Model.HasPendingModification)
+    {
+        <a class="btn btn-primary" asp-controller="ModificationRequests" asp-action="Create" asp-route-orderId="@Model.Id">Request Modification</a>
+    }
+    @if (Model.HasPendingModification)
+    {
+        <span class="status-badge status-pending">Pending modification request</span>
+    }
+    @if (canMarkReady)
+    {
+        <form asp-action="MarkReadyToDispatch" asp-route-id="@Model.Id" method="post" data-confirm="Are you sure you want to mark this order Ready to Dispatch?">
+            <button class="btn btn-warning" type="submit">Mark Ready to Dispatch</button>
+        </form>
+    }
+    @if (canOpenDispatch)
+    {
+        <a class="btn btn-success" asp-controller="Dispatch" asp-action="Open" asp-route-orderId="@Model.Id">Open Dispatch</a>
+    }
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-lg-4">
+        <section class="card-panel">
+            <div class="panel-header"><h2>Customer</h2><p>Customer identity cannot be changed through a modification request.</p></div>
+            <dl class="detail-list">
+                <dt>Code</dt><dd>@Model.CustomerCode</dd>
+                <dt>Name</dt><dd>@Model.CustomerName</dd>
+                <dt>Mobile</dt><dd>@(string.IsNullOrWhiteSpace(Model.CustomerMobile) ? "—" : Model.CustomerMobile)</dd>
+                <dt>Bill amount</dt><dd>₹ @Model.BillAmount.ToString("N2")</dd>
+                <dt>Payment</dt><dd>@Model.PaymentConditionName</dd>
+            </dl>
+        </section>
+    </div>
+    <div class="col-lg-4">
+        <section class="card-panel">
+            <div class="panel-header"><h2>Billing address</h2></div>
+            <p class="mb-1">@Model.BillingAddress</p>
+            <p class="mb-0 text-muted">@Model.BillingCity, @Model.BillingState @Model.BillingPincode</p>
+        </section>
+    </div>
+    <div class="col-lg-4">
+        <section class="card-panel">
+            <div class="panel-header"><h2>Delivery address</h2></div>
+            <p class="mb-1">@Model.DeliveryAddress</p>
+            <p class="mb-0 text-muted">@Model.DeliveryCity, @Model.DeliveryState @Model.DeliveryPincode</p>
+        </section>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-lg-6">
+        <section class="card-panel">
+            <div class="panel-header"><h2>Transporter &amp; booking</h2></div>
+            <dl class="detail-list">
+                <dt>Transporter</dt><dd>@Model.TransporterName</dd>
+                <dt>Booking no.</dt><dd>@(Model.BookingNumber ?? "—")</dd>
+                <dt>Booking date</dt><dd>@(Model.BookingDate?.ToString("dd MMM yyyy") ?? "—")</dd>
+                <dt>From / To</dt><dd>@(string.IsNullOrWhiteSpace(Model.BookingFrom) && string.IsNullOrWhiteSpace(Model.BookingTo) ? "—" : $"{Model.BookingFrom} → {Model.BookingTo}")</dd>
+                <dt>Details</dt><dd>@(Model.BookingDetails ?? "—")</dd>
+            </dl>
+        </section>
+    </div>
+    <div class="col-lg-6">
+        <section class="card-panel">
+            <div class="panel-header"><h2>Remarks</h2></div>
+            <p class="mb-2">@(string.IsNullOrWhiteSpace(Model.Remarks) ? "—" : Model.Remarks)</p>
+            <div class="panel-header"><h2>Special instructions</h2></div>
+            <p class="mb-0">@(string.IsNullOrWhiteSpace(Model.SpecialInstructions) ? "—" : Model.SpecialInstructions)</p>
+        </section>
+    </div>
+</div>
+
+<section class="card-panel mb-3">
+    <div class="panel-header"><h2>Products</h2></div>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Model</th>
+                    <th>Unit</th>
+                    <th class="text-end">Qty</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td><code>@item.ProductCode</code></td>
+                    <td>@item.ProductName</td>
+                    <td>@(item.ModelNumber ?? "—")</td>
+                    <td>@(item.Unit ?? "—")</td>
+                    <td class="text-end">@item.Quantity.ToString("0.###")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="card-panel mb-3">
+    <div class="panel-header"><h2>Modification requests</h2></div>
+    @if (Model.ModificationHistory.Count == 0)
+    {
+        <p class="text-muted mb-0">No modification requests.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Requested by</th>
+                        <th>Date</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Reviewed by</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @{ var index = Model.ModificationHistory.Count; }
+                @foreach (var item in Model.ModificationHistory)
+                {
+                    <tr>
+                        <td>@item.RequestedByName</td>
+                        <td>@item.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                        <td>@item.Reason</td>
+                        <td>
+                            <span class="status-badge @(item.Status == ModificationRequestStatus.Pending ? "status-pending" : item.Status == ModificationRequestStatus.Approved ? "status-approved" : "status-rejected")">@item.StatusLabel</span>
+                            @if (!string.IsNullOrWhiteSpace(item.RejectionReason))
+                            {
+                                <div class="text-muted small mt-1">@item.RejectionReason</div>
+                            }
+                        </td>
+                        <td>@(item.ReviewedByName ?? "—")</td>
+                        <td class="text-end"><a class="btn btn-sm btn-secondary" asp-controller="ModificationRequests" asp-action="Details" asp-route-id="@item.Id">View</a></td>
+                    </tr>
+                    index--;
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="card-panel">
+    <div class="panel-header"><h2>Dispatch information</h2></div>
+    @if (Model.Dispatch is null || !Model.Dispatch.IsCompleted)
+    {
+        <p class="text-muted mb-0">Not dispatched yet.</p>
+    }
+    else
+    {
+        <p class="mb-3"><span class="status-badge status-done">Dispatch completed</span></p>
+        <dl class="detail-list">
+            <dt>Dispatch date</dt><dd>@(Model.Dispatch.DispatchDate?.ToString("dd MMM yyyy") ?? "—")</dd>
+            <dt>Dispatch person</dt><dd>@Model.Dispatch.DispatchPersonName</dd>
+            <dt>Transporter</dt><dd>@Model.Dispatch.TransporterName</dd>
+            <dt>LR number</dt><dd>@(Model.Dispatch.LrNumber ?? "—")</dd>
+            <dt>Booking number</dt><dd>@(Model.Dispatch.BookingNumber ?? "—")</dd>
+            <dt>Notes</dt><dd>@(Model.Dispatch.Notes ?? "—")</dd>
+        </dl>
+        @if (Model.Dispatch.Documents.Count > 0)
+        {
+            <h3 class="h6 mt-3">Documents</h3>
+            <ul class="mb-0">
+                @foreach (var document in Model.Dispatch.Documents)
+                {
+                    <li>
+                        <a asp-controller="Dispatch" asp-action="Document" asp-route-id="@document.Id">@document.OriginalFileName</a>
+                        <span class="text-muted">· @document.DocumentTypeLabel</span>
+                    </li>
+                }
+            </ul>
+        }
+    }
+</section>

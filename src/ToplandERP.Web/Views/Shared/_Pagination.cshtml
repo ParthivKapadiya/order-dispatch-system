@@ -1,0 +1,70 @@
+@model IPagedResult
+@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    string? search = null;
+    bool? isActive = null;
+    Guid? companyId = null;
+    string? role = null;
+    int? status = null;
+
+    switch (ViewBag.Query as object)
+    {
+        case PagedQuery paged:
+            search = paged.Search;
+            isActive = paged.IsActive;
+            companyId = paged.CompanyId;
+            break;
+        case UserListQuery userQuery:
+            search = userQuery.Search;
+            isActive = userQuery.IsActive;
+            companyId = userQuery.CompanyId;
+            role = userQuery.Role;
+            break;
+        case OrderListQuery orderQuery:
+            search = orderQuery.Search;
+            companyId = orderQuery.CompanyId;
+            status = orderQuery.Status.HasValue ? (int)orderQuery.Status.Value : null;
+            break;
+        case ModificationListQuery modificationQuery:
+            companyId = modificationQuery.CompanyId;
+            status = modificationQuery.Status.HasValue ? (int)modificationQuery.Status.Value : null;
+            break;
+        case DispatchListQuery dispatchQuery:
+            companyId = dispatchQuery.CompanyId;
+            break;
+        case NotificationListQuery:
+            break;
+    }
+}
+
+@if (Model.TotalPages > 1)
+{
+    <nav class="table-footer d-flex justify-content-between align-items-center flex-wrap gap-2" aria-label="Pagination">
+        <span class="text-muted">Showing page @Model.Page of @Model.TotalPages (@Model.TotalCount records)</span>
+        <ul class="pagination mb-0">
+            <li class="page-item @(!Model.HasPrevious ? "disabled" : null)">
+                <a class="page-link" asp-action="@action" asp-controller="@controller"
+                   asp-route-page="@(Model.Page - 1)"
+                   asp-route-search="@search"
+                   asp-route-isActive="@isActive"
+                   asp-route-companyId="@companyId"
+                   asp-route-role="@role"
+                   asp-route-status="@status">Previous</a>
+            </li>
+            <li class="page-item @(!Model.HasNext ? "disabled" : null)">
+                <a class="page-link" asp-action="@action" asp-controller="@controller"
+                   asp-route-page="@(Model.Page + 1)"
+                   asp-route-search="@search"
+                   asp-route-isActive="@isActive"
+                   asp-route-companyId="@companyId"
+                   asp-route-role="@role"
+                   asp-route-status="@status">Next</a>
+            </li>
+        </ul>
+    </nav>
+}
+else
+{
+    <div class="table-footer text-muted">@Model.TotalCount record(s)</div>
+}

@@ -14,6 +14,14 @@ public class OrderItem : BaseEntity, ICompanyScoped
 
     public Product? Product { get; set; }
 
+    public string ProductCode { get; set; } = string.Empty;
+
+    public string ProductName { get; set; } = string.Empty;
+
+    public string? ModelNumber { get; set; }
+
+    public string? Unit { get; set; }
+
     public decimal Quantity { get; set; }
 
     public string? Notes { get; set; }
